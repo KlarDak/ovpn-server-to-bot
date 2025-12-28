@@ -1,0 +1,61 @@
+import express from 'express';
+import type { Request, Response, NextFunction } from 'express';
+import dotenv from "dotenv";
+import { allowedIps, serverProps } from './utils/envUtil.js';
+import usersRouter from './routers/usersRouter.js';
+import { responseGenerator } from './utils/resgenUtil.js';
+import { decodeToken } from './utils/jwtUtil.js';
+
+const app = express();
+dotenv.config();
+
+app.use(express.json());
+app.use((req: Request, res: Response, next: NextFunction) => {
+    const ip: string = req.ip || "";
+
+    if (!allowedIps().includes(ip)) {
+        return res.status(403).json({ error: "Access denied by IP", ip: ip });
+    }
+    
+    next();
+});
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+    if (!["GET", "POST", "PUT", "PATCH", "DELETE"].includes(req.method)) {
+        return res
+          .status(405)
+          .json(responseGenerator(405, "Method Not Allowed"));
+    }
+    
+    if (!["GET", "DELETE"].includes(req.method) && Object.keys(req.body ?? []).length === 0) {
+        return res
+          .status(400)
+          .json(responseGenerator(400, "Request body is missing"));
+    }
+
+    if (!req.headers.authorization) {
+        return res
+          .status(401)
+          .json(responseGenerator(403, "Authorization header missing"));
+    }
+
+    const decodedToken = decodeToken(req.headers.authorization as string);
+    
+    if (!decodedToken) {
+        return res.status(401).json(responseGenerator(401, "Invalid authorization token format"));
+    }
+
+    (req as any).tokenPayload = decodedToken;
+
+    next();
+});
+
+app.use("/v2.0/users/", usersRouter);
+
+app.get("/", (req: Request, res: Response) => {
+    res.send("Welcome to the secure server!");
+});
+
+app.listen(serverProps().port, serverProps().hostname, () => {
+    console.log(`Server running at http://${serverProps().hostname}:${serverProps().port}/`);
+});

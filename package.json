@@ -1,0 +1,26 @@
+{
+  "dependencies": {
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/redis": "^4.0.10",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "ioredis": "^5.8.2",
+    "jsonwebtoken": "^9.0.3",
+    "redis": "^5.10.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "uuid": "^13.0.0"
+  },
+  "name": "ovpn-server-to-bot",
+  "version": "2.0.0",
+  "description": "Библиотека для связи между OpenVPN-сервером и бот-сервером. Обновлённая версия.",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "start": "node ./src/app.js",
+    "dev": "tsx ./src/app.ts"
+  },
+  "author": "CNS",
+  "license": "ISC"
+}
