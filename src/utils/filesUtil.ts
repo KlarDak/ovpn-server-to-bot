@@ -20,3 +20,8 @@ export function deleteFile(configName: string): boolean {
     return true;
 }
  
+export function isDirExists(): boolean {
+    return fs.existsSync(
+        path.join(pathDirs().configDir)
+    );
+}

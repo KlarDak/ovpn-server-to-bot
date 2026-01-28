@@ -5,6 +5,7 @@ import { allowedIps, serverProps } from './utils/envUtil.js';
 import usersRouter from './routers/usersRouter.js';
 import { responseGenerator } from './utils/resgenUtil.js';
 import { decodeToken } from './utils/jwtUtil.js';
+import botRouter from './routers/botRouter.js';
 
 const app = express();
 dotenv.config();
@@ -51,6 +52,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use("/v2.0/users/", usersRouter);
+app.use("/v2.0/bot/", botRouter);
 
 app.get("/", (req: Request, res: Response) => {
     res.send("Welcome to the secure server!");

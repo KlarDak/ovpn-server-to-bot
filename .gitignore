@@ -2,3 +2,5 @@
 pja-package.json
 .env
 tests/
+UTILITIES.md
+middlewares/

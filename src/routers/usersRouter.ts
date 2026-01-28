@@ -92,10 +92,10 @@ usersRouter.put("/config", (req: Request, res: Response) => {
         .json(responseGenerator(400, "Invalid UUID format"));
     }
 
-    if (isFileExist(uuid)) {
+    if (!isFileExist(uuid)) {
       return res
         .status(409)
-        .json(responseGenerator(409, "Configuration file already exists"));
+        .json(responseGenerator(409, "Configuration file is not exists"));
     }
     
     const uuidFileCreated = updateFile(uuid);
@@ -135,10 +135,10 @@ usersRouter.patch("/config", (req: Request, res: Response) => {
         .json(responseGenerator(400, "Invalid UUID format"));
     }
 
-    if (isFileExist(uuid)) {
+    if (!isFileExist(uuid)) {
       return res
         .status(409)
-        .json(responseGenerator(409, "Configuration file already exists"));
+        .json(responseGenerator(409, "Configuration file is not exists"));
     }
 
     const updatedUserConfig = configFiles.update(uuid, type, time);

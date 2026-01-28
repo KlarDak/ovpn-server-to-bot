@@ -106,6 +106,10 @@ class configFiles {
     static is_exist(uuid: string): boolean {
         return fs.existsSync(this.path(uuid));
     }
+
+    static is_dir_exists(dirPath: string): boolean {
+        return fs.existsSync(dirPath);
+    }
 }
 
 export { configFiles };

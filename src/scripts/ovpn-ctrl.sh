@@ -13,7 +13,7 @@ if [ -z "$USER" ] || [ -z "$ACTION" ]; then
 fi
 
 if [[ ! "$USER" =~ ^[a-zA-Z0-9_-]+$ ]]; then
-    exit 1;
+    exit 2;
 fi
 
 CA="/etc/openvpn/easy-rsa/pki/ca.crt"
@@ -28,7 +28,7 @@ TEMPLATE="/etc/openvpn/client/test.conf"
 
 if [ "$ACTION" = "create" ]; then 
     if [ -f "$REQS" ]; then
-        exit 1;
+        exit 3;
     fi
 
     ./easyrsa build-client-full $USER nopass
@@ -53,16 +53,22 @@ if [ "$ACTION" = "create" ]; then
     "$TEMPLATE" > "$OUT"
 
     if [ ! -f "$OUT" ]; then
-        exit 1;
+        exit 4;
     fi
 fi
 
 if [ "$ACTION" = "revoke" ]; then
     if [ ! -f "$REQS" ]; then
-        exit 1;
+        exit 3;
     fi
 
     rm $CERT $KEY $REQS
 
     exit 0;
 fi
+
+# 0 - Success
+# 1 - Error with arguments
+# 2 - Error with uuid argument
+# 3 - File not found
+# 4 - File not created

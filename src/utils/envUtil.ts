@@ -27,3 +27,7 @@ export function redisPaths(): any {
         port: process.env.REDIS_PORT ?? 6379
     }
 }
+
+export function configPath(): string {
+    return process.env.CONFIG_SCRIPT ?? "script.sh";
+}

@@ -39,6 +39,15 @@ class RedisUtil {
         }
     }
 
+    async ping(): Promise<string | false> {
+        try {
+            return await this.redisConn.ping();
+        } catch(error: any) {
+            console.error(consoleError("Redis-ping", error));
+            return false;
+        }
+    }
+
     async get(key: string): Promise<string | null> {
         try {
             return await this.redisConn.get(key);
