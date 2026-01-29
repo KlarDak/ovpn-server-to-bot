@@ -7,6 +7,7 @@ import { pathDirs, redisPaths } from '../utils/envUtil.js';
 import { configFiles } from '../utils/configUtil.js';
 import { exec } from "child_process";
 import { Redis } from 'ioredis';
+import { deleteUserConfig, getUserConfig, patchUserConfig, postUserConfig, putUserConfig } from '../services/configsServices.js';
 
 const botRouter = Router();
 
@@ -29,7 +30,6 @@ botRouter.get("/status/", async (req: Request, res: Response) => {
         
         const redisStatus: boolean = (await redisConnect.ping() === "PONG") ? true : false;
         const ovpnDirExists: boolean = isDirExists();
-        console.log(pathDirs().configDir);
         const configsDirExists: boolean = configFiles.is_dir_exists(pathDirs().usersDir);
 
         exec("pgrep openvpn", (error, stdout, stderr) => {
@@ -88,8 +88,43 @@ botRouter.get("/active", async(req: Request, res: Response) => {
     }
 });
 
-botRouter.post("/config", (req: Request, res: Response) => {
+botRouter.post("/config", async (req: Request, res: Response) => {
+    const reqType = (req as any).tokenPayload.type as string;
     
+    if (!["get", "create", "recreate", "update", "delete"].includes(reqType)) {
+        return res.status(403).json(responseGenerator(403, "Access denied: insufficient permissions. Change endpoint or use an admin token."));
+    }
+
+    const {uuid, type, time} = req.body;
+
+    if (!uuid) {
+        return res.status(403).json(responseGenerator(403, "Access denied: missing required field uuid."));
+    }
+
+    let result;
+
+    switch (reqType) {
+        case "get":
+            result = getUserConfig(uuid);
+            break;
+        case "create":
+            result = await postUserConfig(uuid, type, time);
+            break;
+        case "recreate":
+            result = await putUserConfig(uuid, type, time);
+            break;
+        case "update":
+            result = await patchUserConfig(uuid, type, time);
+            break;
+        case "delete":
+            result = deleteUserConfig(uuid);
+            break;
+        default:
+            return responseGenerator(400, "Invalid request type");
+    }
+
+    return res.status(result.code).json(result);
+
 });
 
 export default botRouter;

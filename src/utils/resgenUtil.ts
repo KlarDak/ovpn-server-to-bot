@@ -1,4 +1,6 @@
-export function responseGenerator(code: number, message: string, data: any = null): any {
+import type { IResponseConfig } from "../interfaces/IResponseConfig.js";
+
+export function responseGenerator(code: number, message: string, data: any = null): IResponseConfig {
     return {code: code, data: data, message: message};
 }
 
