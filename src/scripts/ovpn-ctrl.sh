@@ -3,7 +3,7 @@
 # exec 2>/dev/null
 
 cd /etc/openvpn/easy-rsa
-CLIENTS_DIR="/home/vpnserver/tests"
+CLIENTS_DIR=$3
 
 ACTION=$1
 USER=$2
@@ -26,7 +26,7 @@ REQS="/etc/openvpn/easy-rsa/pki/reqs/$USER.req" # FOR CHECK AND CLEAR
 OUT="$CLIENTS_DIR/$USER.ovpn"
 TEMPLATE="/etc/openvpn/client/test.conf"
 
-if [ "$ACTION" = "create" ]; then 
+create() {
     if [ -f "$REQS" ]; then
         exit 3;
     fi
@@ -55,9 +55,9 @@ if [ "$ACTION" = "create" ]; then
     if [ ! -f "$OUT" ]; then
         exit 4;
     fi
-fi
+}
 
-if [ "$ACTION" = "revoke" ]; then
+delete() {
     if [ ! -f "$REQS" ]; then
         exit 3;
     fi
@@ -65,6 +65,19 @@ if [ "$ACTION" = "revoke" ]; then
     rm $CERT $KEY $REQS
 
     exit 0;
+}
+
+if [ "$ACTION" = "create" ]; then 
+    exit create
+fi
+
+if [ "$ACTION" = "delete" ]; then
+    exit delete
+fi
+
+if [ "$ACTION" = "update" ]; then 
+    delete
+    exit create
 fi
 
 # 0 - Success

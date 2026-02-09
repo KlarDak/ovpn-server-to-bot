@@ -21,6 +21,10 @@ export function pathDirs(): any {
     };
 }
 
+export function subIndex(): string {
+    return process.env.SUB_INDEX ?? "ksd_nl_01";
+}
+
 export function redisPaths(): any {
     return {
         hostname: process.env.REDIS_HOSTNAME ?? "localhost",
@@ -30,4 +34,12 @@ export function redisPaths(): any {
 
 export function configPath(): string {
     return process.env.CONFIG_SCRIPT ?? "script.sh";
+}
+
+export function actionPath(): string {
+    return process.env.ACTION_SCRIPT ?? "script.sh";
+}
+
+export function feedbackWebhookUrl(): string {
+    return process.env.FEEDBACK_WEBHOOK_URL ?? "https://example.com/webhook";
 }

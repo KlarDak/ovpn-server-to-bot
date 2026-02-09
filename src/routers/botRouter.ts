@@ -8,6 +8,7 @@ import { configFiles } from '../utils/configUtil.js';
 import { exec } from "child_process";
 import { Redis } from 'ioredis';
 import { deleteUserConfig, getUserConfig, patchUserConfig, postUserConfig, putUserConfig } from '../services/configsServices.js';
+import activeRouter from './activeRouter.js';
 
 const botRouter = Router();
 
@@ -18,6 +19,8 @@ botRouter.use((req: Request, res: Response, next: NextFunction) => {
 
     next();
 });
+
+botRouter.use("/active", activeRouter);
 
 botRouter.get("/status/", async (req: Request, res: Response) => {
     if ((req as any).tokenPayload.type !== "check") {
@@ -49,42 +52,6 @@ botRouter.get("/status/", async (req: Request, res: Response) => {
     } 
     catch (error) {
         res.status(500).json(responseGenerator(500, "Error to set something data", error));
-    }
-});
-
-botRouter.get("/active", async(req: Request, res: Response) => {
-    if ((req as any).tokenPayload.type !== "check") {
-        return res.status(403).json(responseGenerator(403, "Access denied: insufficient permissions. Change endpoint or use an admin token."));
-    }
-    
-    const redis = new Redis({ host: redisPaths().hostname, port: redisPaths().port });
-
-    try {
-      let keys: string[] = [];
-      let cursor = 0;
-
-      do {
-        const [nextCursor, found] = await redis.scan(
-          cursor,
-          "MATCH",
-          "active:*",
-          "COUNT",
-          100,
-        );
-        cursor = Number(nextCursor);
-        keys.push(...found);
-      } while (cursor !== 0);
-
-      res.status(200).json({
-        date: new Date().toISOString(),
-        server_number: 1,
-        server_code: "ksd_nl_01",
-        active_users: keys.length
-      });
-    } catch (error) {
-      res
-        .status(500)
-        .json({ error: "Failed to get active users", details: error });
     }
 });
 
