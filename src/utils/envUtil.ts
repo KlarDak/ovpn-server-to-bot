@@ -18,6 +18,7 @@ export function pathDirs(): any {
         configDir: process.env.CONFIG_DIR ?? "./tests/configs",
         logDir: process.env.LOG_DIR ?? "./tests/logs",
         usersDir: process.env.USERS_DIR ?? "./tests/usersconfigs",
+        userDB: process.env.USER_DB ?? "./tests/users.db",
     };
 }
 
@@ -27,7 +28,7 @@ export function subIndex(): string {
 
 export function redisPaths(): any {
     return {
-        hostname: process.env.REDIS_HOSTNAME ?? "localhost",
+        hostname: process.env.REDIS_HOSTNAME ?? "Redis-7.2",
         port: process.env.REDIS_PORT ?? 6379
     }
 }

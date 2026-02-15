@@ -1,9 +1,13 @@
 import type { IUserConfig } from "../interfaces/IUserConfig.js";
 import { pathDirs } from "./envUtil.js";
-import fs from "fs";
+import SQLiteClient from "./sqliteUtil.js";
 
 class configFiles {
 
+
+    static getConnect(): SQLiteClient {
+        return new SQLiteClient(pathDirs().userDB);
+    }
     /**
      * Created user-config file (in .JSON format)
      * @param uuid - UUID of user
@@ -16,20 +20,12 @@ class configFiles {
             return false;
         }
 
-        const userConfig: IUserConfig = {
+        this.getConnect().create("users", {
             uuid: uuid,
-            version: 1,
             user_type: type,
-            expired_time: new Date(Date.now() + time * 1000).toISOString(),
             created_at: new Date().toISOString(),
-            status: "active",
-        };
-
-        fs.writeFileSync(
-            this.path(uuid),
-            JSON.stringify(userConfig, null, 2),
-            "utf-8"
-        );
+            expired_time: new Date(Date.now() + time * 1000).toISOString(),
+        });
 
         return true;
     }
@@ -40,11 +36,21 @@ class configFiles {
      * @param uuid - UUID of user
      * @returns IUserConfig | false - user config object or false if not found
      */
-    static get(uuid: string): IUserConfig | false {
-        return (
-            (JSON.parse(fs.readFileSync(this.path(uuid), "utf-8")) as IUserConfig) ??
-            false
-        );
+    static async get(uuid: string): Promise<IUserConfig | false> {        
+        try {
+            const row = await this.getConnect().get(
+              "SELECT * FROM users WHERE uuid = ?",
+              [uuid],
+            );
+            if (!row) {
+                return false;
+            } 
+            
+            return row as IUserConfig;
+        } catch (error) {
+            console.error("Error fetching user config:", error);
+            return false;
+        }
     }
 
     /**
@@ -56,6 +62,27 @@ class configFiles {
         return pathDirs().usersDir + `/${uuid}.json`;
     }
 
+
+    static async createTable(): Promise<boolean> {
+        try {
+            await this.getConnect().run(`
+                CREATE TABLE IF NOT EXISTS users (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    uuid TEXT UNIQUE NOT NULL,
+                    user_type TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    expired_time TEXT NOT NULL
+                )
+            `);
+            console.log("Users table created or already exists.");
+
+            return true;
+        }
+        catch (error) {
+            console.error("Error creating users table:", error);
+            return false;
+        }
+    }
     /**
      * Update user-config file
      * @param uuid - UUID of user
@@ -63,52 +90,59 @@ class configFiles {
      * @param type - type of user ( admin | user | guest )
      * @returns boolean - true if updated, false if error
      */
-    static update(uuid: string, time?: number, type?: string): boolean {
-        if (!this.is_exist(uuid)) {
+    static async update(uuid: string, time?: number, type?: string): Promise<boolean> {
+        try {
+          const updates: any = {};
+
+          if (time && time > 0) {
+            updates.expired_time = new Date(
+              Date.now() + time * 1000,
+            ).toISOString();
+          }
+
+          if (type && ["admin", "user", "guest"].includes(type)) {
+            updates.user_type = type;
+          }
+
+          if (Object.keys(updates).length === 0) {
+            return false; // No valid updates provided
+          }
+
+          await this.getConnect().update("users", updates, "WHERE uuid = ?", [uuid])
+            
+          return true;
+        } catch (error) {
+            console.error("An error has been occurred during user config update:", error);
             return false;
         }
-
-        const uuidConfig = this.get(uuid) as IUserConfig;
-
-        if (type && ["admin", "user", "guest"].includes(type)) {
-            uuidConfig.user_type = type;
-        }
-
-        if (time && time > 0) {
-            uuidConfig.expired_time = new Date(
-            Date.now() + time * 1000
-            ).toISOString();
-        }
-
-        fs.writeFileSync(
-            this.path(uuid),
-            JSON.stringify(uuidConfig, null, 2),
-            "utf-8"
-        );
-
-        return true;
     }
+    
 
     /**
      * Delete user-config file
      * @param uuid - UUID of user
      * @returns boolean - true if deleted, false if error
      */
-    static delete(uuid: string): boolean {
-        if (!this.is_exist(uuid)) {
+    static async delete(uuid: string): Promise<boolean> {
+        try {
+            await this.getConnect().delete("users", "WHERE uuid = ?", [uuid])
+            ;
+            return true;
+        } catch (error) {
+            console.error("An error has been occurred during user config deletion:", error);
             return false;
         }
-
-        fs.unlinkSync(this.path(uuid));
-        return true;
     }
 
-    static is_exist(uuid: string): boolean {
-        return fs.existsSync(this.path(uuid));
-    }
-
-    static is_dir_exists(dirPath: string): boolean {
-        return fs.existsSync(dirPath);
+    static async isExists(): Promise<boolean> {
+        try {
+            await this.getConnect().get("SELECT 1");
+            return true;
+        }
+        catch (error) {            
+            console.error("User DB does not exist or is not accessible:", error);
+            return false;
+        }
     }
 }
 

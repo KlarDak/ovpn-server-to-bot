@@ -3,10 +3,9 @@ import type { NextFunction, Request, Response } from 'express';
 import RedisUtil from '../utils/redisUtil.js';
 import { responseGenerator } from '../utils/resgenUtil.js';
 import { isDirExists } from '../utils/filesUtil.js';
-import { pathDirs, redisPaths } from '../utils/envUtil.js';
+import { redisPaths } from '../utils/envUtil.js';
 import { configFiles } from '../utils/configUtil.js';
 import { exec } from "child_process";
-import { Redis } from 'ioredis';
 import { deleteUserConfig, getUserConfig, patchUserConfig, postUserConfig, putUserConfig } from '../services/configsServices.js';
 import activeRouter from './activeRouter.js';
 
@@ -33,7 +32,7 @@ botRouter.get("/status/", async (req: Request, res: Response) => {
         
         const redisStatus: boolean = (await redisConnect.ping() === "PONG") ? true : false;
         const ovpnDirExists: boolean = isDirExists();
-        const configsDirExists: boolean = configFiles.is_dir_exists(pathDirs().usersDir);
+        const configsDirExists: boolean = await configFiles.isExists();
 
         exec("pgrep openvpn", (error, stdout, stderr) => {
             const isOVPNActive = !error && stdout.trim() ? true : false;
