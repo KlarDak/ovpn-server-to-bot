@@ -89,22 +89,26 @@ class configFiles {
      * @param type - type of user ( admin | user | guest )
      * @returns boolean - true if updated, false if error
      */
-    static async update(uuid: string, time?: number, type?: string): Promise<boolean> {
+    static async update(uuid: string, time?: number, type?: string, ban?: boolean): Promise<boolean> {
         try {
             const updates: any = {};
 
             if (time && time > 0) {
-            updates.expired_time = new Date(
-                Date.now() + time * 1000,
-            ).toISOString();
+                updates.expired_time = new Date(Date.now() + time * 1000).toISOString();
             }
 
             if (type && ["admin", "user", "guest"].includes(type)) {
-            updates.user_type = type;
+                updates.user_type = type;
+            }
+
+            if (ban === true) {
+                updates.status = "banned";
+            } else if (ban === false) {
+                updates.status = "active";
             }
 
             if (Object.keys(updates).length === 0) {
-            return false; // No valid updates provided
+                return false; // No valid updates provided
             }
 
             await this.userDB.update("users", updates, "WHERE uuid = ?", [uuid]);
