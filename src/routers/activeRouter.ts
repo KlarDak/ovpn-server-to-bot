@@ -6,6 +6,9 @@ import { actionPath, redisPaths } from "../utils/envUtil.js";
 import { verifyUuidFormat } from "../utils/verifyUtil.js";
 import { execFile } from "child_process";
 import { promisify } from "util";
+import { getConnectedClients, kickUser } from "../services/doActionUser.js";
+import { configFiles } from "../utils/configUtil.js";
+import { stdout } from "process";
 
 const activeRouter = Router();
 
@@ -25,160 +28,95 @@ activeRouter.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 activeRouter.get("/", async (req: Request, res: Response) => {
-     const redis = new Redis({
-       host: redisPaths().hostname,
-       port: redisPaths().port,
-     });
-
-     try {
-       let keys: string[] = [];
-       let cursor = 0;
-
-       do {
-         const [nextCursor, found] = await redis.scan(
-           cursor,
-           "MATCH",
-           "active:*",
-           "COUNT",
-           100,
-         );
-         cursor = Number(nextCursor);
-         keys.push(...found);
-       } while (cursor !== 0);
-
-       res.status(200).json({
-         date: new Date().toISOString(),
-         server_number: 1,
-         server_code: "ksd_nl_01",
-         active_users: keys.length,
-       });
-     } catch (error) {
-       res
-         .status(500)
-         .json({ error: "Failed to get active users", details: error });
-     }
+     return res.status(200).json(responseGenerator(200, "Active users endpoint is working"));
 });
 
-activeRouter.post("/list", async (req: Request, res: Response) => {
-    const redis = new Redis({
-        host: redisPaths().hostname,
-        port: redisPaths().port,
+activeRouter.post("/list", async (_req: Request, res: Response) => {
+  try {
+    const clients = await getConnectedClients();
+
+    res.status(200).json({
+      date: new Date().toISOString(),
+      server_number: 1,
+      server_code: "ksd_nl_01",
+      count: clients.length,
+      active_users: clients,
     });
-
-    try {
-        let keys: string[] = [];
-        let cursor = 0;
-
-        const [nextCursor, found] = await redis.scan(
-          0,
-          "MATCH",
-          "active:*",
-          "COUNT",
-          100,
-        );
-        cursor = Number(nextCursor);
-        keys.push(...found);
-
-        const activeUsers = await Promise.all(
-            keys.map(async (key) => {
-                const data = await redis.get(key);
-                return {key: key.replace("active:", ""), data: JSON.parse(data || "{}") };
-            }),
-        );
-        res.status(200).json({ active_users: activeUsers });
-    }
-    catch (error) {
-        res.status(500).json({ error: "Failed to get active users", details: error });
-    }
+  } catch (error: any) {
+    res.status(500).json({
+      error: "Failed to get active users",
+      details: {
+        message: error?.message,
+        raw: String(error),
+      },
+    });
+  }
 });
 
 activeRouter.post("/kick", async (req: Request, res: Response) => {
-    const { uuid } = req.body;
+  const { uuid } = req.body;
 
-    if (!uuid || !verifyUuidFormat(uuid)) {
-        return res.status(400).json(responseGenerator(400, "Invalid or missing uuid in request body."));
-    }
+  if (!uuid || !verifyUuidFormat(uuid)) {
+    return res
+      .status(400)
+      .json(responseGenerator(400, "Invalid or missing uuid."));
+  }
 
-    try {
+  try {
+    await kickUser(uuid);
 
-        const { stdout } = await execFileAsync(actionPath(), ["kick", uuid]);
-
-        if (stdout.trim() !== "OK") {
-            return res.status(500).json(responseGenerator(500, "Failed to kick user: action script error", { details: stdout }));
-        }
-
-        const key = `active:${uuid}`;
-        const exists = await redis.exists(key);
-        if (!exists) {
-            return res.status(404).json(responseGenerator(404, "User not found or not active."));
-        }
-
-        await redis.del(key);
-        res.status(200).json(responseGenerator(200, "User kicked successfully."));
-    } catch (error) {
-        res.status(500).json({ error: "Failed to kick user", details: error });
-    }
+    res.status(200).json(responseGenerator(200, "User kicked successfully."));
+  } catch (error) {
+    res.status(500).json({
+      error: "Failed to kick user",
+      details: error,
+    });
+  }
 });
 
 activeRouter.post("/ban", async (req: Request, res: Response) => {
-    const { uuid } = req.body;
+  const { uuid } = req.body;
 
-    if (!uuid || !verifyUuidFormat(uuid)) {
-        return res.status(400).json(responseGenerator(400, "Invalid or missing uuid in request body."));
-    }
+  if (!uuid || !verifyUuidFormat(uuid)) {
+    return res
+      .status(400)
+      .json(responseGenerator(400, "Invalid or missing uuid."));
+  }
 
-    try {
-        const { stdout } = await execFileAsync(actionPath(), ["ban", uuid]);
+  try {
 
-        if (stdout.trim() !== "OK") {
-            return res.status(500).json(responseGenerator(500, "Failed to ban user: action script error", { details: stdout }));
-        }
+    configFiles.update(uuid, 0, "banned");
 
-        const key = `active:${uuid}`;
-        const exists = await redis.exists(key);
-        if (exists) {
-            await redis.del(key);
-        }
-        res.status(200).json(responseGenerator(200, "User banned successfully."));
-    }
-    catch (error) {
-        res.status(500).json({ error: "Failed to ban user", details: error });
-    }
+    await kickUser(uuid);
+
+    res.status(200).json(responseGenerator(200, "User banned successfully."));
+  } catch (error) {
+    res.status(500).json({
+      error: "Failed to kick user",
+      details: error,
+    });
+  }
 });
 
 activeRouter.post("/pardon", async (req: Request, res: Response) => {
-    const { uuid } = req.body;
+  const { uuid } = req.body;
 
-    if (!uuid || !verifyUuidFormat(uuid)) {
-      return res
-        .status(400)
-        .json(
-          responseGenerator(400, "Invalid or missing uuid in request body."),
-        );
-    }
+  if (!uuid || !verifyUuidFormat(uuid)) {
+    return res
+      .status(400)
+      .json(responseGenerator(400, "Invalid or missing uuid."));
+  }
 
-    try {
-      const { stdout } = await execFileAsync(actionPath(), ["pardon", uuid]);
+  try {
+    configFiles.update(uuid, 0, "active");
 
-      if (stdout.trim() !== "OK") {
-        return res
-          .status(500)
-          .json(
-            responseGenerator(500, "Failed to ban user: action script error", {
-              details: stdout,
-            }),
-          );
-      }
-
-      const key = `active:${uuid}`;
-      const exists = await redis.exists(key);
-      if (exists) {
-        await redis.del(key);
-      }
-      res.status(200).json(responseGenerator(200, "User banned successfully."));
-    } catch (error) {
-      res.status(500).json({ error: "Failed to ban user", details: error });
-    }
+    res.status(200).json(responseGenerator(200, "User pardoned successfully."));
+  } catch (error) {
+    res.status(500).json({
+      error: "Failed to pardon user",
+      details: error,
+    });
+  }
 });
 
 export default activeRouter;

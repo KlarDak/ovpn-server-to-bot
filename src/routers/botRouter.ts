@@ -11,6 +11,8 @@ import activeRouter from './activeRouter.js';
 
 const botRouter = Router();
 
+botRouter.use("/active", activeRouter);
+
 botRouter.use((req: Request, res: Response, next: NextFunction) => {
     if ((req as any).tokenPayload.role !== "bot") {
         return res.status(403).json(responseGenerator(403, "Access denied: insufficient permissions. Change endpoint or use an admin token."));
@@ -18,8 +20,6 @@ botRouter.use((req: Request, res: Response, next: NextFunction) => {
 
     next();
 });
-
-botRouter.use("/active", activeRouter);
 
 botRouter.get("/status/", async (req: Request, res: Response) => {
     if ((req as any).tokenPayload.type !== "check") {
