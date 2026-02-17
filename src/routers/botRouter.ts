@@ -30,6 +30,7 @@ botRouter.get("/status/", async (req: Request, res: Response) => {
         const redisConnect = new RedisUtil(redisPaths().hostname, redisPaths().port);
         await redisConnect.connect();
         
+        configFiles.createTable();
         const redisStatus: boolean = (await redisConnect.ping() === "PONG") ? true : false;
         const ovpnDirExists: boolean = isDirExists();
         const configsDirExists: boolean = await configFiles.isExists();

@@ -61,27 +61,27 @@ class configFiles {
     }
 
 
-    // static async createTable(): Promise<boolean> {
-    //     try {
-    //         await this.userDB.run(`
-    //             CREATE TABLE IF NOT EXISTS users (
-    //                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-    //                 uuid TEXT NOT NULL,
-    //                 user_type TEXT NOT NULL,
-    //                 created_at TEXT NOT NULL,
-    //                 expired_time TEXT NOT NULL,
-    //                 status TEXT NOT NULL DEFAULT 'active'
-    //             )
-    //         `);
-    //         console.log("Users table created or already exists.");
+    static async createTable(): Promise<boolean> {
+        try {
+            await this.userDB.run(`
+                CREATE TABLE IF NOT EXISTS users (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    uuid TEXT NOT NULL,
+                    user_type TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    expired_time TEXT NOT NULL,
+                    status TEXT NOT NULL DEFAULT 'active'
+                )
+            `);
+            console.log("Users table created or already exists.");
     
-    //         return true;
-    //     }
-    //     catch (error) {
-    //         console.error("Error creating users table:", error);
-    //         return false;
-    //     }
-    // }
+            return true;
+        }
+        catch (error) {
+            console.error("Error creating users table:", error);
+            return false;
+        }
+    }
     /**
      * Update user-config file
      * @param uuid - UUID of user
