@@ -85,7 +85,7 @@ activeRouter.post("/ban", async (req: Request, res: Response) => {
 
   try {
 
-    configFiles.update(uuid, 0, "banned");
+    configFiles.update(uuid, 0, "user", true);
 
     await kickUser(uuid);
 
@@ -108,7 +108,7 @@ activeRouter.post("/pardon", async (req: Request, res: Response) => {
   }
 
   try {
-    configFiles.update(uuid, 0, "active");
+    configFiles.update(uuid, 0, "active", false);
 
     res.status(200).json(responseGenerator(200, "User pardoned successfully."));
   } catch (error) {
