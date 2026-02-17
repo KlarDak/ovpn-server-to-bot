@@ -2,13 +2,19 @@
 
 # exec 2>/dev/null
 
+if [ "$EUID" -ne 0 ]; then
+        echo "Run as root";
+        echo $3
+        exit 1;
+fi;
+
 cd /etc/openvpn/easy-rsa
 CLIENTS_DIR=$3
 
 ACTION=$1
 USER=$2
 
-if [ -z "$USER" ] || [ -z "$ACTION" ]; then 
+if [ -z "$USER" ] || [ -z "$ACTION" ]; then
     exit 1;
 fi
 
@@ -24,15 +30,15 @@ KEY="/etc/openvpn/easy-rsa/pki/private/$USER.key"
 REQS="/etc/openvpn/easy-rsa/pki/reqs/$USER.req" # FOR CHECK AND CLEAR
 
 OUT="$CLIENTS_DIR/$USER.ovpn"
-TEMPLATE="/etc/openvpn/client/test.conf"
+TEMPLATE="/etc/openvpn/scripts/test.conf"
 
-create() {
+if [ "$ACTION" = "create" ]; then
     if [ -f "$REQS" ]; then
         exit 3;
     fi
 
     ./easyrsa build-client-full $USER nopass
-    
+
     sed \
     -e "/^{CA_CERT}$/{
         r $CA
@@ -55,9 +61,9 @@ create() {
     if [ ! -f "$OUT" ]; then
         exit 4;
     fi
-}
+fi
 
-delete() {
+if [ "$ACTION" = "revoke" ]; then
     if [ ! -f "$REQS" ]; then
         exit 3;
     fi
@@ -65,19 +71,6 @@ delete() {
     rm $CERT $KEY $REQS
 
     exit 0;
-}
-
-if [ "$ACTION" = "create" ]; then 
-    exit create
-fi
-
-if [ "$ACTION" = "delete" ]; then
-    exit delete
-fi
-
-if [ "$ACTION" = "update" ]; then 
-    delete
-    exit create
 fi
 
 # 0 - Success

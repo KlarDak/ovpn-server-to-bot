@@ -2,9 +2,11 @@ import express from 'express';
 import type { Request, Response, NextFunction } from 'express';
 import { allowedIps, serverProps } from './utils/envUtil.js';
 import usersRouter from './routers/usersRouter.js';
-import { responseGenerator } from './utils/resgenUtil.js';
+import { consoleError, responseGenerator } from './utils/resgenUtil.js';
 import { decodeToken } from './utils/jwtUtil.js';
 import botRouter from './routers/botRouter.js';
+import { decodeLink } from './utils/slinkUtil.js';
+import { getFile, isFileExist } from './utils/filesUtil.js';
 
 const app = express();
 
@@ -52,8 +54,32 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 app.use("/v2.0/users/", usersRouter);
 app.use("/v2.0/bot/", botRouter);
 
+app.post("/v2.0/configs/download", async (req: Request, res: Response) => {
+    if ((req as any).tokenPayload.type !== "download") {
+        return res.status(403).json(responseGenerator(403, "Check your role for this action."));
+    }
+
+    if (!/^[A-Za-z0-9]{6}$/.test(req.body.link)) {
+        return res.status(400).json(responseGenerator(400, "Invalid link format"));
+    }
+
+    const decodedSLink = await decodeLink(req.body.link);
+
+    if (!decodedSLink) {
+        return res.status(404).json(responseGenerator(404, "Link not found or expired"));
+    }
+
+    if (!isFileExist(decodedSLink)) {
+        return res.status(404).json(responseGenerator(404, "Configuration file not found"));
+    }
+
+    return res.download(getFile(decodedSLink) as string, `${decodedSLink}.ovpn`, (err) => {
+        console.error(consoleError("File Download", err));
+    });
+});
+
 app.get("/", (req: Request, res: Response) => {
-    res.send("Welcome to the secure server!");
+  res.send("Welcome to the secure server! Use the API endpoints to interact with the server.");
 });
 
 app.listen(serverProps().port, serverProps().hostname, () => {

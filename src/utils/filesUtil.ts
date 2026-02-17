@@ -12,6 +12,10 @@ export function isFileExist(configName: string): boolean {
     );
 }
 
+export function getFile(configName: string): string {
+  return path.join(pathDirs().configDir, `/${configName}.ovpn`);
+}
+
 export async function createFile(uuid: string, inDatest?: boolean) : Promise<boolean> {
     if (isFileExist(uuid)) {
         return false;
