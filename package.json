@@ -22,8 +22,15 @@
   "type": "module",
   "scripts": {
     "start": "node ./src/app.js",
-    "dev": "tsx ./src/app.ts"
+    "dev": "tsx ./src/app.ts",
+    "test": "vitest"
   },
   "author": "CNS",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.6",
+    "vitest": "^4.0.18"
+  }
 }

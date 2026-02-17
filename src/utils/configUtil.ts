@@ -3,11 +3,8 @@ import { pathDirs } from "./envUtil.js";
 import SQLiteClient from "./sqliteUtil.js";
 
 class configFiles {
+    static userDB: SQLiteClient = new SQLiteClient(pathDirs().userDB);
 
-
-    static getConnect(): SQLiteClient {
-        return new SQLiteClient(pathDirs().userDB);
-    }
     /**
      * Created user-config file (in .JSON format)
      * @param uuid - UUID of user
@@ -20,11 +17,12 @@ class configFiles {
             return false;
         }
 
-        this.getConnect().create("users", {
+        this.userDB.create("users", {
             uuid: uuid,
             user_type: type,
             created_at: new Date().toISOString(),
             expired_time: new Date(Date.now() + time * 1000).toISOString(),
+            status: "active"
         });
 
         return true;
@@ -38,7 +36,7 @@ class configFiles {
      */
     static async get(uuid: string): Promise<IUserConfig | false> {        
         try {
-            const row = await this.getConnect().get(
+            const row = await this.userDB.get(
               "SELECT * FROM users WHERE uuid = ?",
               [uuid],
             );
@@ -63,26 +61,27 @@ class configFiles {
     }
 
 
-    static async createTable(): Promise<boolean> {
-        try {
-            await this.getConnect().run(`
-                CREATE TABLE IF NOT EXISTS users (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    uuid TEXT UNIQUE NOT NULL,
-                    user_type TEXT NOT NULL,
-                    created_at TEXT NOT NULL,
-                    expired_time TEXT NOT NULL
-                )
-            `);
-            console.log("Users table created or already exists.");
-
-            return true;
-        }
-        catch (error) {
-            console.error("Error creating users table:", error);
-            return false;
-        }
-    }
+    // static async createTable(): Promise<boolean> {
+    //     try {
+    //         await this.userDB.run(`
+    //             CREATE TABLE IF NOT EXISTS users (
+    //                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+    //                 uuid TEXT NOT NULL,
+    //                 user_type TEXT NOT NULL,
+    //                 created_at TEXT NOT NULL,
+    //                 expired_time TEXT NOT NULL,
+    //                 status TEXT NOT NULL DEFAULT 'active'
+    //             )
+    //         `);
+    //         console.log("Users table created or already exists.");
+    
+    //         return true;
+    //     }
+    //     catch (error) {
+    //         console.error("Error creating users table:", error);
+    //         return false;
+    //     }
+    // }
     /**
      * Update user-config file
      * @param uuid - UUID of user
@@ -92,25 +91,25 @@ class configFiles {
      */
     static async update(uuid: string, time?: number, type?: string): Promise<boolean> {
         try {
-          const updates: any = {};
+            const updates: any = {};
 
-          if (time && time > 0) {
+            if (time && time > 0) {
             updates.expired_time = new Date(
-              Date.now() + time * 1000,
+                Date.now() + time * 1000,
             ).toISOString();
-          }
+            }
 
-          if (type && ["admin", "user", "guest"].includes(type)) {
+            if (type && ["admin", "user", "guest"].includes(type)) {
             updates.user_type = type;
-          }
+            }
 
-          if (Object.keys(updates).length === 0) {
+            if (Object.keys(updates).length === 0) {
             return false; // No valid updates provided
-          }
+            }
 
-          await this.getConnect().update("users", updates, "WHERE uuid = ?", [uuid])
-            
-          return true;
+            await this.userDB.update("users", updates, "WHERE uuid = ?", [uuid]);
+          
+            return true;
         } catch (error) {
             console.error("An error has been occurred during user config update:", error);
             return false;
@@ -125,8 +124,8 @@ class configFiles {
      */
     static async delete(uuid: string): Promise<boolean> {
         try {
-            await this.getConnect().delete("users", "WHERE uuid = ?", [uuid])
-            ;
+            await this.userDB.delete("users", "WHERE uuid = ?", [uuid]);
+            
             return true;
         } catch (error) {
             console.error("An error has been occurred during user config deletion:", error);
@@ -136,7 +135,8 @@ class configFiles {
 
     static async isExists(): Promise<boolean> {
         try {
-            await this.getConnect().get("SELECT 1");
+            await this.userDB.get("SELECT 1");
+    
             return true;
         }
         catch (error) {            

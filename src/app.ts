@@ -1,6 +1,5 @@
 import express from 'express';
 import type { Request, Response, NextFunction } from 'express';
-import dotenv from "dotenv";
 import { allowedIps, serverProps } from './utils/envUtil.js';
 import usersRouter from './routers/usersRouter.js';
 import { responseGenerator } from './utils/resgenUtil.js';
@@ -8,7 +7,6 @@ import { decodeToken } from './utils/jwtUtil.js';
 import botRouter from './routers/botRouter.js';
 
 const app = express();
-dotenv.config();
 
 app.use(express.json());
 app.use((req: Request, res: Response, next: NextFunction) => {
