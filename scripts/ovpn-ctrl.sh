@@ -2,6 +2,10 @@
 
 # exec 2>/dev/null
 
+set -a
+source ../.env.server
+set +a
+
 if [ "$EUID" -ne 0 ]; then
         echo "Run as root";
         echo $3
@@ -22,15 +26,14 @@ if [[ ! "$USER" =~ ^[a-zA-Z0-9_-]+$ ]]; then
     exit 2;
 fi
 
-CA="/etc/openvpn/easy-rsa/pki/ca.crt"
-TLS="/etc/openvpn/ta.key"
+CA="$OVPN_SERVER/pki/ca.crt"
+TLS="$OVPN_SERVER/ta.key"
 
-CERT="/etc/openvpn/easy-rsa/pki/issued/$USER.crt"
-KEY="/etc/openvpn/easy-rsa/pki/private/$USER.key"
-REQS="/etc/openvpn/easy-rsa/pki/reqs/$USER.req" # FOR CHECK AND CLEAR
+CERT="$OVPN_SERVER/easy-rsa/pki/issued/$USER.crt"
+KEY="$OVPN_SERVER/easy-rsa/pki/private/$USER.key"
+REQS="$OVPN_SERVER/easy-rsa/pki/reqs/$USER.req" # FOR CHECK AND CLEAR
 
-OUT="$CLIENTS_DIR/$USER.ovpn"
-TEMPLATE="/etc/openvpn/scripts/test.conf"
+OUT="$CONFIGS_DIR/$USER.ovpn"
 
 if [ "$ACTION" = "create" ]; then
     if [ -f "$REQS" ]; then
@@ -56,7 +59,7 @@ if [ "$ACTION" = "create" ]; then
         r $TLS
         d
     }" \
-    "$TEMPLATE" > "$OUT"
+    "$TEMP_FILE" > "$OUT"
 
     if [ ! -f "$OUT" ]; then
         exit 4;

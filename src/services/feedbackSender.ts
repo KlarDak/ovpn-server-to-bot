@@ -1,6 +1,7 @@
 import { feedbackWebhookUrl, subIndex } from "../utils/envUtil.js";
 import { encodeToken } from "../utils/jwtUtil.js";
 
+// NOT USED IN PRODUCTION, ONLY FOR TESTING PURPOSES
 try {
     const args = process.argv.slice(2);
     const type = args[0] || "none";

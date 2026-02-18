@@ -3,7 +3,7 @@
 UUID="$common_name"
 ADDRESS="/srv/ovpn-server-to-bot/userdb/userdb.db"
 
-IS_BANNED=$(sqlite3 "$ADDRESS" "SELECT status FROM users WHERE uuid = '$UUID' LIMIT 1;")
+IS_BANNED=$(sqlite3 "$DB_SERVER" "SELECT status FROM users WHERE uuid = '$UUID' LIMIT 1;")
 
 if [ "$IS_BANNED" = "banned" ]; then
   exit 1;

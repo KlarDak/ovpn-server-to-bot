@@ -13,6 +13,9 @@ const botRouter = Router();
 
 botRouter.use("/active", activeRouter);
 
+/**
+ * Send a command to the OpenVPN management interface and retrieve the response as a string. The function establishes a connection to the management interface using the specified host and port, sends the provided command followed by a "quit" command to terminate the session, and listens for data events to accumulate the response in a buffer. If any errors occur during the connection or communication process, the promise is rejected with the error. Once the connection is closed, the accumulated response is resolved as a string.
+ */
 botRouter.use((req: Request, res: Response, next: NextFunction) => {
     if ((req as any).tokenPayload.role !== "bot") {
         return res.status(403).json(responseGenerator(403, "Access denied: insufficient permissions. Change endpoint or use an admin token."));
@@ -21,6 +24,9 @@ botRouter.use((req: Request, res: Response, next: NextFunction) => {
     next();
 });
 
+/**
+ * Handle GET requests to the "/status/" endpoint to check the status of various server functions. The route checks if the user has the appropriate "check" type in their token payload, and if so, it attempts to connect to a Redis server, checks for the existence of certain directories, and executes a command to check if the OpenVPN process is active. The results of these checks are compiled into a JSON response indicating the status of each function, along with a timestamp and server information. If any errors occur during the checks, it responds with a 500 status code and an error message.
+ */
 botRouter.get("/status/", async (req: Request, res: Response) => {
     if ((req as any).tokenPayload.type !== "check") {
         return res.status(403).json(responseGenerator(403, "Access denied: insufficient permissions. Change endpoint or use an admin token."));
@@ -55,6 +61,9 @@ botRouter.get("/status/", async (req: Request, res: Response) => {
     }
 });
 
+/**
+ * Handle POST requests to the "/config" endpoint to manage user configurations based on the type specified in the token payload. The route checks if the user has one of the allowed types ("get", "create", "recreate", "update", "delete") in their token payload, and if so, it processes the request body to perform the corresponding action on user configurations using the appropriate service functions. The result of the action is then returned in the response with the appropriate status code and JSON data indicating the success or failure of the operation. If the request type is invalid or if required fields are missing, it responds with a 403 status code and an error message.
+ */
 botRouter.post("/config", async (req: Request, res: Response) => {
     const reqType = (req as any).tokenPayload.type as string;
     
