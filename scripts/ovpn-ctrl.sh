@@ -66,6 +66,35 @@ if [ "$ACTION" = "create" ]; then
     fi
 fi
 
+if [ "$ACTION" = "update" ]; then 
+    if [ -f "$REQS" ]; then
+        exit 3;
+    fi
+
+    sed \
+    -e "/^{CA_CERT}$/{
+        r $CA
+        d
+    }" \
+    -e "/^{CLIENT_CERT}$/{
+        r $CERT
+        d
+    }" \
+    -e "/^{CLIENT_KEY}$/{
+        r $KEY
+        d
+    }" \
+    -e "/^{TLS_KEY}$/{
+        r $TLS
+        d
+    }" \
+    "$TEMP_FILE" > "$OUT"
+
+    if [ ! -f "$OUT" ]; then
+        exit 4;
+    fi
+fi
+
 if [ "$ACTION" = "revoke" ]; then
     if [ ! -f "$REQS" ]; then
         exit 3;
