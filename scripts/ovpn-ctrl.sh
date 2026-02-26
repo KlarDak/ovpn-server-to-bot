@@ -71,6 +71,8 @@ if [ "$ACTION" = "update" ]; then
         exit 3;
     fi
 
+    rm "$OUT"
+
     sed \
     -e "/^{CA_CERT}$/{
         r $CA
