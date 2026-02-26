@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 UUID="$common_name"
-ADDRESS="/srv/ovpn-server-to-bot/userdb/userdb.db"
+DB_SERVER="/srv/ovpn-server-to-bot/userdb/userdb.db"
 
 IS_BANNED=$(sqlite3 "$DB_SERVER" "SELECT status FROM users WHERE uuid = '$UUID' LIMIT 1;")
 
