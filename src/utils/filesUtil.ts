@@ -36,7 +36,7 @@ export async function createFile(uuid: string) : Promise<boolean> {
         return false;
     }
 
-    const newUser = await execFileAsync("sudo", [configPath(), "create", uuid, pathDirs().configDir]);
+    const newUser = await execFileAsync("sudo", [configPath(), "create", uuid]);
 
     if (newUser.stderr) {
         console.error("An error has been occurred during file creation:", newUser.stderr);
@@ -57,7 +57,7 @@ export async function updateFile(uuid: string): Promise<boolean> {
       return false;
     }
 
-    const newUser = await execFileAsync("sudo", [configPath(), "update", uuid, pathDirs().configDir]);
+    const newUser = await execFileAsync("sudo", [configPath(), "update", uuid]);
 
     if (newUser.stderr) {
       console.error(
@@ -80,7 +80,7 @@ export async function deleteFile(uuid: string): Promise<boolean> {
       return false;
     }
 
-    const newUser = await execFileAsync("sudo", [configPath(), "delete", uuid, pathDirs().configDir]);
+    const newUser = await execFileAsync("sudo", [configPath(), "delete", uuid]);
     if (newUser.stderr) {
       console.error(
         "An error has been occurred during file deletion:",
