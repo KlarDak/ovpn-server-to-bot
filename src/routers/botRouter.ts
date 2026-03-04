@@ -21,7 +21,7 @@ botRouter.use((req: Request, res: Response, next: NextFunction) => {
         return res.status(403).json(responseGenerator(403, "Access denied: insufficient permissions. Change endpoint or use an admin token."));
     }
 
-    next();
+    return next();
 });
 
 /**
@@ -41,7 +41,7 @@ botRouter.get("/status/", async (req: Request, res: Response) => {
         const ovpnDirExists: boolean = isDirExists();
         const configsDirExists: boolean = await configFiles.isExists();
 
-        exec("pgrep openvpn", (error, stdout, stderr) => {
+        return exec("pgrep openvpn", (error, stdout) => {
             const isOVPNActive = !error && stdout.trim() ? true : false;
 
             return res.status(200).json(responseGenerator(200, "Set status of all server's functions", {
@@ -57,7 +57,7 @@ botRouter.get("/status/", async (req: Request, res: Response) => {
         });
     } 
     catch (error) {
-        res.status(500).json(responseGenerator(500, "Error to set something data", error));
+        return res.status(500).json(responseGenerator(500, "Error to set something data", error));
     }
 });
 

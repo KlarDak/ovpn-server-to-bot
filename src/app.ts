@@ -2,12 +2,9 @@ import express from 'express';
 import type { Request, Response, NextFunction } from 'express';
 import { allowedIps, serverProps } from './utils/envUtil.js';
 import usersRouter from './routers/usersRouter.js';
-import { consoleError, responseGenerator } from './utils/resgenUtil.js';
+import { responseGenerator } from './utils/resgenUtil.js';
 import { decodeToken } from './utils/jwtUtil.js';
 import botRouter from './routers/botRouter.js';
-import { decodeLink } from './utils/slinkUtil.js';
-import { getFile, isFileExist } from './utils/filesUtil.js';
-import { config } from 'dotenv';
 import configDownloadRouter from './routers/configDownloadRouter.js';
 
 const app = express();
@@ -20,7 +17,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
         return res.status(403).json({ error: "Access denied by IP", ip: ip });
     }
     
-    next();
+    return next();
 });
 
 app.use((req: Request, res: Response, next: NextFunction) => {
@@ -50,14 +47,14 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
     (req as any).tokenPayload = decodedToken;
 
-    next();
+    return next();
 });
 
 app.use("/v2.0/configs/", configDownloadRouter);
 app.use("/v2.0/users/", usersRouter);
 app.use("/v2.0/bot/", botRouter);
 
-app.get("/", (req: Request, res: Response) => {
+app.get("/", (_, res: Response) => {
   res.send("Welcome to the secure server! Use the API endpoints to interact with the server.");
 });
 

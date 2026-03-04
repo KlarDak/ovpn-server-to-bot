@@ -1,23 +1,11 @@
 import Router from "express";
 import type { NextFunction, Request, Response } from "express";
 import { responseGenerator } from "../utils/resgenUtil.js";
-import { Redis } from "ioredis";
-import { actionPath, redisPaths } from "../utils/envUtil.js";
 import { verifyUuidFormat } from "../utils/verifyUtil.js";
-import { execFile } from "child_process";
-import { promisify } from "util";
 import { getConnectedClients, kickUser } from "../services/doActionUser.js";
 import { configFiles } from "../utils/configUtil.js";
-import { stdout } from "process";
 
 const activeRouter = Router();
-
-const execFileAsync = promisify(execFile);
-
-const redis = new Redis({
-    host: redisPaths().hostname,
-    port: redisPaths().port,
-});
 
 /**
  * Middleware function to check if the user has the "active" type in their token payload before allowing access to the routes defined in this router. If the user's type is not "active", it responds with a 403 status code and an error message indicating insufficient permissions. If the user has the correct type, it calls the next middleware function or route handler in the stack.
@@ -27,13 +15,13 @@ activeRouter.use((req: Request, res: Response, next: NextFunction) => {
         return res.status(403).json(responseGenerator(403, "Access denied: insufficient permissions. Change endpoint or use an admin token."));
     }
 
-    next();
+    return next();
 });
 
 /**
  * Handle GET requests to the "/status/" endpoint to check the status of various server functions. The route checks if the user has the appropriate "check" type in their token payload, and if so, it attempts to connect to a Redis server, checks for the existence of certain directories, and executes a command to check if the OpenVPN process is active. The results of these checks are compiled into a JSON response indicating the status of each function, along with a timestamp and server information. If any errors occur during the checks, it responds with a 500 status code and an error message.
  */
-activeRouter.get("/", async (req: Request, res: Response) => {
+activeRouter.get("/", async (_, res: Response) => {
      return res.status(200).json(responseGenerator(200, "Active users endpoint is working"));
 });
 
@@ -74,9 +62,9 @@ activeRouter.post("/kick", async (req: Request, res: Response) => {
   try {
     await kickUser(uuid);
 
-    res.status(200).json(responseGenerator(200, "User kicked successfully."));
+    return res.status(200).json(responseGenerator(200, "User kicked successfully."));
   } catch (error) {
-    res.status(500).json(responseGenerator(500, "Failed to kick user", {
+    return res.status(500).json(responseGenerator(500, "Failed to kick user", {
         info: error,
       }));
   }
@@ -97,9 +85,9 @@ activeRouter.post("/ban", async (req: Request, res: Response) => {
 
     await kickUser(uuid);
 
-    res.status(200).json(responseGenerator(200, "User banned successfully."));
+    return res.status(200).json(responseGenerator(200, "User banned successfully."));
   } catch (error) {
-    res.status(500).json(responseGenerator(500, "Failed to ban user", {
+    return res.status(500).json(responseGenerator(500, "Failed to ban user", {
         info: error,
       }));
   }
@@ -120,9 +108,9 @@ activeRouter.post("/pardon", async (req: Request, res: Response) => {
   try {
     configFiles.update(uuid, 0, "active", false);
 
-    res.status(200).json(responseGenerator(200, "User pardoned successfully."));
+    return res.status(200).json(responseGenerator(200, "User pardoned successfully."));
   } catch (error) {
-    res.status(500).json(responseGenerator(500, "Failed to pardon user", {
+    return res.status(500).json(responseGenerator(500, "Failed to pardon user", {
         info: error,
       }));
     }

@@ -4,7 +4,7 @@ import { configFiles } from "../utils/configUtil.js";
 import { createFile, deleteFile, isFileExist, updateFile } from "../utils/filesUtil.js";
 import { responseGenerator } from "../utils/resgenUtil.js";
 import { encodeLink } from "../utils/slinkUtil.js";
-import { verifyRequiredFields, verifyUuidFormat } from "../utils/verifyUtil.js";
+import { verifyUuidFormat } from "../utils/verifyUtil.js";
 
 /**
  * Retrieve the user configuration for the given UUID if it exists, and return a standardized response object containing the status code, message and user configuration data. The function first verifies if the input UUID is in a valid format using the verifyUuidFormat function. If the UUID format is invalid, it returns a response with a 400 status code and an appropriate error message. If the UUID format is valid but the corresponding configuration file does not exist, it returns a response with a 404 status code and an appropriate error message. If the configuration file exists, it retrieves the user parameters from the configFiles object and returns a response with a 200 status code, a success message, and the retrieved user configuration data.

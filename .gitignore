@@ -1,7 +1,9 @@
 /node_modules
 pja-package.json
 .env
+.env.server
 tests/
 UTILITIES.md
 middlewares/
 userdir/
+dist/

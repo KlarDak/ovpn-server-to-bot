@@ -13,7 +13,7 @@ usersRouter.use((req: Request, res: Response, next: NextFunction) => {
         return res.status(403).json(responseGenerator(403, "Access denied: insufficient permissions. Change endpoint or use an admin token."));
     }
 
-    next();
+    return next();
 });
 
 
@@ -53,7 +53,7 @@ usersRouter.put("/config", async (req: Request, res: Response) => {
 usersRouter.patch("/config", (req: Request, res: Response) => {
     const { uuid, type, time } = req.body;
     
-    const patchConfig = patchUserConfig(uuid, type, time);
+    patchUserConfig(uuid, type, time);
 
     return res.status(200).json(responseGenerator(200, "User configuration updated successfully", {
         "uuid": uuid,
