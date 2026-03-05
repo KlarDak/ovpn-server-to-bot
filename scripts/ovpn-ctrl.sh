@@ -20,13 +20,15 @@ if [[ ! "$USER" =~ ^[a-zA-Z0-9_-]+$ ]]; then
     exit 2;
 fi
 
-CA="$OVPN_SERVER/pki/ca.crt"
+CA="$OVPN_SERVER/ca.crt"
 TLS="$OVPN_SERVER/ta.key"
 
 CERT="$OVPN_SERVER/easy-rsa/pki/issued/$USER.crt"
 KEY="$OVPN_SERVER/easy-rsa/pki/private/$USER.key"
 REQS="$OVPN_SERVER/easy-rsa/pki/reqs/$USER.req" # FOR CHECK AND CLEAR
 OUT="$CONFIGS_DIR/$USER.ovpn"
+
+cd /etc/openvpn/easy-rsa
 
 if [ "$ACTION" = "create" ]; then
     if [ -f "$REQS" ]; then
