@@ -9,18 +9,19 @@ const configDownloadRouter = Router();
 /**
  * Handle POST requests to download a configuration file based on a provided link in the request body. The route checks if the user has the appropriate "download" type in their token payload, validates the format of the provided link, decodes the link to retrieve the corresponding configuration identifier, checks if the configuration file exists, and if all checks pass, it initiates the download of the configuration file with a filename based on the decoded identifier. If any of the checks fail (e.g., invalid role, invalid link format, link not found, or file not found), it responds with the appropriate status code and error message indicating the reason for the failure.
  */
-configDownloadRouter.post("/download", async (req: Request, res: Response) => {
+configDownloadRouter.get("/download/:shortlink", async (req: Request, res: Response) => {
   if ((req as any).tokenPayload.type !== "download") {
     return res
       .status(403)
       .json(responseGenerator(403, "Check your role for this action."));
   }
 
-  if (!/^[A-Za-z0-9]{6}$/.test(req.body.link)) {
+  const sl = req.params.shortlink as string;
+  if (!/^[A-Za-z0-9]{6}$/.test(sl)) {
     return res.status(400).json(responseGenerator(400, "Invalid link format"));
   }
 
-  const decodedSLink = await decodeLink(req.body.link);
+  const decodedSLink = await decodeLink(sl);
 
   if (!decodedSLink) {
     return res
