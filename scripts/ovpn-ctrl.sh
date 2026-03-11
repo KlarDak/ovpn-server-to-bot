@@ -36,6 +36,8 @@ if [ "$ACTION" = "create" ]; then
     fi
 
     ./easyrsa build-client-full $USER nopass
+    ./easyrsa gen-crl
+    cp pki/crl.pem $OVPN_SERVER
 
     sed \
     -e "/^{CA_CERT}$/{
@@ -99,6 +101,8 @@ if [ "$ACTION" = "revoke" ]; then
 
     rm "$OUT";
     cd "${OVPN_SERVER}/easy-rsa/";
+
+    IS_BANNED=$(sqlite3 "$DB_SERVER" "SELECT status FROM users WHERE uuid = '$USER' LIMIT 1;");
 
     ./easyrsa --batch revoke $USER
     ./easyrsa gen-crl
