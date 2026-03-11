@@ -100,9 +100,9 @@ if [ "$ACTION" = "revoke" ]; then
     rm "$OUT";
     cd "${OVPN_SERVER}/easy-rsa/";
 
-    ./easyrsa revoke $USER
+    ./easyrsa --batch revoke $USER
     ./easyrsa gen-crl
-    cp -f pki/crl.pem "{$OVPN_SERVER}"
+    cp -f pki/crl.pem "$OVPN_SERVER"
 
     exit 0;
 fi
