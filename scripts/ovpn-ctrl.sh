@@ -28,7 +28,7 @@ KEY="$OVPN_SERVER/easy-rsa/pki/private/$USER.key"
 REQS="$OVPN_SERVER/easy-rsa/pki/reqs/$USER.req" # FOR CHECK AND CLEAR
 OUT="$CONFIGS_DIR/$USER.ovpn"
 
-cd /etc/openvpn/easy-rsa
+cd "${OVPN_SERVER}/easy-rsa"
 
 if [ "$ACTION" = "create" ]; then
     if [ -f "$REQS" ]; then
@@ -97,7 +97,12 @@ if [ "$ACTION" = "revoke" ]; then
         exit 3;
     fi
 
-    rm $CERT $KEY $REQS
+    rm "$OUT";
+    cd "${OVPN_SERVER}/easy-rsa/";
+
+    ./easyrsa revoke $USER
+    ./easyrsa gen-crl
+    cp -f pki/crl.pem "{$OVPN_SERVER}"
 
     exit 0;
 fi
