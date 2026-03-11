@@ -80,7 +80,7 @@ export async function deleteFile(uuid: string): Promise<boolean> {
       return false;
     }
 
-    const newUser = await execFileAsync("sudo", [configPath(), "delete", uuid]);
+    const newUser = await execFileAsync("sudo", [configPath(), "revoke", uuid]);
     if (newUser.stderr) {
       console.error(
         "An error has been occurred during file deletion:",
