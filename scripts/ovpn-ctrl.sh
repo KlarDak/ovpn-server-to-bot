@@ -35,7 +35,7 @@ if [ "$ACTION" = "create" ]; then
         exit 3;
     fi
 
-    ./easyrsa build-client-full $USER nopass
+    ./easyrsa --batch build-client-full $USER nopass
     ./easyrsa gen-crl
     cp pki/crl.pem $OVPN_SERVER
 
