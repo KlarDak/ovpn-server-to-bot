@@ -57,10 +57,11 @@ export async function postUserConfig(uuid: string, type: string, time: number): 
         return responseGenerator(500, "Failed to create user configuration");
     }
 
+    const slink = await encodeLink(uuid, time);
     return responseGenerator(200, "User configuration created successfully", 
         {
             "uuid": uuid,
-            "link": await encodeLink(uuid, time)
+            "link": slink
         }
     );
 }
