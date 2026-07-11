@@ -4,6 +4,10 @@ import { responseGenerator } from "../utils/resgenUtil.js";
 import { verifyUuidFormat } from "../utils/verifyUtil.js";
 import { getConnectedClients, kickUser } from "../services/doActionUser.js";
 import { configFiles } from "../utils/configUtil.js";
+<<<<<<< HEAD
+=======
+import { subIndex } from "../utils/envUtil.js";
+>>>>>>> 3a5dcc4 (dev-2.1)
 
 const activeRouter = Router();
 
@@ -11,7 +15,7 @@ const activeRouter = Router();
  * Middleware function to check if the user has the "active" type in their token payload before allowing access to the routes defined in this router. If the user's type is not "active", it responds with a 403 status code and an error message indicating insufficient permissions. If the user has the correct type, it calls the next middleware function or route handler in the stack.
  */
 activeRouter.use((req: Request, res: Response, next: NextFunction) => {
-    if ((req as any).tokenPayload.type !== "active") {
+    if (!(req as any).tokenPayload.role.includes("admin")) {
         return res.status(403).json(responseGenerator(403, "Access denied: insufficient permissions. Change endpoint or use an admin token."));
     }
 
@@ -26,16 +30,16 @@ activeRouter.get("/", async (_, res: Response) => {
 });
 
 /**
- * Handle POST requests to the "/list" endpoint to retrieve a list of currently connected clients. The route calls the getConnectedClients service function to fetch the list of active users, and then responds with a JSON object containing the current date, server information, the count of active users, and an array of active user details. If any errors occur during the retrieval of active users, it responds with a 500 status code and an error message indicating the failure to get active users.
+ * Handle GET requests to the "/list" endpoint to retrieve a list of currently connected clients. The route calls the getConnectedClients service function to fetch the list of active users, and then responds with a JSON object containing the current date, server information, the count of active users, and an array of active user details. If any errors occur during the retrieval of active users, it responds with a 500 status code and an error message indicating the failure to get active users.
  */
-activeRouter.post("/list", async (_req: Request, res: Response) => {
+activeRouter.get("/list", async (_req: Request, res: Response) => {
   try {
     const clients = await getConnectedClients();
 
     res.status(200).json(responseGenerator(200, "List of active users retrieved successfully", {
       date: new Date().toISOString(),
       server_number: 1,
-      server_code: "ksd_nl_01",
+      server_code: subIndex(),
       count: clients.length,
       active_users: clients,
     }));

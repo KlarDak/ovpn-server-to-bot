@@ -33,6 +33,7 @@ export async function decodeLink(slink: string): Promise<string | false> {
     await redisConnection.connect();
 
     const getLink = await redisConnection.get(`sl:${slink}`); 
+    await redisConnection.del(`sl:${slink}`);
     await redisConnection.disconnect();
     
     if (!getLink) {

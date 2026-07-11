@@ -4,8 +4,9 @@ import { allowedIps, serverProps } from './utils/envUtil.js';
 import usersRouter from './routers/usersRouter.js';
 import { responseGenerator } from './utils/resgenUtil.js';
 import { decodeToken } from './utils/jwtUtil.js';
-import botRouter from './routers/botRouter.js';
 import configDownloadRouter from './routers/configDownloadRouter.js';
+import activeRouter from './routers/activeRouter.js';
+import serverRouter from "./routers/serverRouter.js";
 
 const app = express();
 
@@ -50,9 +51,10 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     return next();
 });
 
-app.use("/v2.0/configs/", configDownloadRouter);
-app.use("/v2.0/users/", usersRouter);
-app.use("/v2.0/bot/", botRouter);
+app.use("/api/download/", configDownloadRouter);
+app.use("/api/config/", usersRouter);
+app.use("/api/server/", serverRouter);
+app.use("/api/active/", activeRouter);
 
 app.get("/", (_, res: Response) => {
   res.send("Welcome to the secure server! Use the API endpoints to interact with the server.");

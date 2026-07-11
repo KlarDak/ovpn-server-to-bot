@@ -47,9 +47,9 @@ export function decodeToken(token: string): any {
  * @param role - role of the token, usually the permission level of the user
  * @returns string | false - JWT token if successful, false otherwise
  */
-export function encodeToken(sub: string, type: string, role: string): string | false {
+export function encodeToken(sub: string, role: string): string | false {
     try {
-        const token = jsonwebtoken.sign(payloadGenerator(sub, type, role), keyStats(), { expiresIn: "12s" });
+        const token = jsonwebtoken.sign(payloadGenerator(sub, role), keyStats(), { expiresIn: "12s" });
         return token;
     }
     catch (error) {
@@ -59,20 +59,18 @@ export function encodeToken(sub: string, type: string, role: string): string | f
 }
 
 /**
- * Generate the payload for the JWT token with the given subject, type and role
+ * Generate the payload for the JWT token with the given subject and role
  * @param sub - subject of the token, usually the index of server
- * @param type - type of the token, usually the action to be performed
  * @param role - role of the token, usually the permission level of the user
  * @returns object - payload for the JWT token
  */
-export function payloadGenerator(sub: string, type: string, role: string): ITokenConfig {
+export function payloadGenerator(sub: string, role: string): ITokenConfig {
     return {
       sub: sub,
       aud: subIndex(),
       iat: Date.now(),
       exp: Date.now() + 12000,
-      role: role as "admin" | "user" | "guest" | "bot",
-      type: type as "create" | "recreate" | "update" | "delete" | "get" | "active",
+      role: role as "admin" | "bot" | "site" | "user",
     };
 }
 

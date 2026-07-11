@@ -135,18 +135,18 @@ export async function patchUserConfig(uuid: string, time?: number, type?: string
  * @param uuid - unique identifier for the user configuration, which should be in a valid UUID format
  * @returns IResponseConfig - standardized response object containing the status code, message and relevant data if deletion is successful, or an appropriate error message if deletion fails due to invalid UUID format or non-existent configuration file for the given UUID
  */
-export function deleteUserConfig(uuid: string): IResponseConfig {
+export async function deleteUserConfig(uuid: string): Promise<IResponseConfig> {
     if (!verifyUuidFormat(uuid)) {
         return responseGenerator(400, "Invalid UUID format")
     }
 
-    const uuidFile = deleteFile(uuid);
+    const uuidFile = await deleteFile(uuid);
 
     if (!uuidFile) {
         return responseGenerator(500, "Failed to delete configuration file")
     }
 
-    const deleteUserConfig = configFiles.delete(uuid);
+    const deleteUserConfig = await configFiles.delete(uuid);
 
     if (!deleteUserConfig) {
         return responseGenerator(500, "Failed to delete user configuration")
