@@ -1,10 +1,11 @@
 import net from "node:net";
+import { vpnManagementPaths } from "../utils/envUtil.js";
 
 /**
  * This module provides functions to interact with the OpenVPN management interface, allowing you to retrieve information about connected clients and kick users based on their UUID. The sendCommand function establishes a TCP connection to the management interface, sends a command, and returns the response as a string. The getConnectedClients function retrieves the list of currently connected clients and their details, while the kickUser function allows you to disconnect a user by sending a kill command with their UUID.
  */
-const HOST = "127.0.0.1";
-const PORT = 7505;
+const HOST = vpnManagementPaths().host;
+const PORT = vpnManagementPaths().port;
 
 /**
  * Send a command to the OpenVPN management interface and return the response as a string. The function establishes a TCP connection to the management interface using the specified host and port, sends the command followed by a newline character, and listens for data events to accumulate the response. Once the connection is closed, it resolves the promise with the accumulated response string. If an error occurs during the connection or communication, it rejects the promise with the error.

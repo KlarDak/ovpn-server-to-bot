@@ -4,7 +4,7 @@ import { responseGenerator } from "../utils/resgenUtil.js";
 import { verifyUuidFormat } from "../utils/verifyUtil.js";
 import { getConnectedClients, kickUser } from "../services/doActionUser.js";
 import { configFiles } from "../utils/configUtil.js";
-import si from "systeminformation";
+import { subIndex } from "../utils/envUtil.js";
 
 const activeRouter = Router();
 
@@ -12,7 +12,7 @@ const activeRouter = Router();
  * Middleware function to check if the user has the "active" type in their token payload before allowing access to the routes defined in this router. If the user's type is not "active", it responds with a 403 status code and an error message indicating insufficient permissions. If the user has the correct type, it calls the next middleware function or route handler in the stack.
  */
 activeRouter.use((req: Request, res: Response, next: NextFunction) => {
-    if ((req as any).tokenPayload.type !== "active") {
+    if (!(req as any).tokenPayload.role.includes("admin")) {
         return res.status(403).json(responseGenerator(403, "Access denied: insufficient permissions. Change endpoint or use an admin token."));
     }
 
@@ -27,16 +27,16 @@ activeRouter.get("/", async (_, res: Response) => {
 });
 
 /**
- * Handle POST requests to the "/list" endpoint to retrieve a list of currently connected clients. The route calls the getConnectedClients service function to fetch the list of active users, and then responds with a JSON object containing the current date, server information, the count of active users, and an array of active user details. If any errors occur during the retrieval of active users, it responds with a 500 status code and an error message indicating the failure to get active users.
+ * Handle GET requests to the "/list" endpoint to retrieve a list of currently connected clients. The route calls the getConnectedClients service function to fetch the list of active users, and then responds with a JSON object containing the current date, server information, the count of active users, and an array of active user details. If any errors occur during the retrieval of active users, it responds with a 500 status code and an error message indicating the failure to get active users.
  */
-activeRouter.post("/list", async (_req: Request, res: Response) => {
+activeRouter.get("/list", async (_req: Request, res: Response) => {
   try {
     const clients = await getConnectedClients();
 
     res.status(200).json(responseGenerator(200, "List of active users retrieved successfully", {
       date: new Date().toISOString(),
       server_number: 1,
-      server_code: "ksd_nl_01",
+      server_code: subIndex(),
       count: clients.length,
       active_users: clients,
     }));
@@ -45,69 +45,6 @@ activeRouter.post("/list", async (_req: Request, res: Response) => {
         message: error?.message,
         raw: String(error),
       }));
-  }
-});
-
-activeRouter.post("/htop", async (_req: Request, res: Response) => {
-  try {
-    const [cpu, memory, disk, netStat] = await Promise.all([
-      si.currentLoad(),
-      si.mem(),
-      si.fsSize(),
-      si.networkStats(),
-    ]);
-
-    const net = netStat[0] || null;
-
-    const toKb = (value?: number) =>
-      value == null || value < 0 ? null : Number((value / 1024).toFixed(2));
-
-    const incoming = toKb(net?.rx_sec);
-    const outgoing = toKb(net?.tx_sec);
-
-    const time = si.time();
-
-    const data = {
-      timestamp: new Date().toISOString(),
-      cpu: {
-        usage_percent: Number(cpu.currentLoad.toFixed(2)),
-        avg_load: cpu.avgLoad,
-        cores: cpu.cpus?.length ?? 1,
-      },
-      memory: {
-        total_gb: Number((memory.total / 1024 / 1024 / 1024).toFixed(2)),
-        used_gb: Number((memory.used / 1024 / 1024 / 1024).toFixed(2)),
-        active_gb: Number((memory.active / 1024 / 1024 / 1024).toFixed(2)),
-        available_gb: Number(
-          (memory.available / 1024 / 1024 / 1024).toFixed(2),
-        ),
-        free_gb: Number((memory.free / 1024 / 1024 / 1024).toFixed(2)),
-        usage_percent: Number(((memory.used / memory.total) * 100).toFixed(2)),
-      },
-      disk: disk.map((d) => ({
-        type: d.type,
-        mount: d.mount,
-        total_gb: Number((d.size / 1024 / 1024 / 1024).toFixed(2)),
-        used_gb: Number((d.used / 1024 / 1024 / 1024).toFixed(2)),
-        available_gb: Number((d.available / 1024 / 1024 / 1024).toFixed(2)),
-        usage_percent: Number(d.use.toFixed(2)),
-      })),
-      network: {
-        incoming_kb_sec: incoming,
-        outgoing_kb_sec: outgoing,
-        total_kb_sec:
-          incoming != null && outgoing != null
-            ? Number((incoming + outgoing).toFixed(2))
-            : null,
-      },
-      uptime_seconds: time.uptime,
-    };
-
-    res.json(responseGenerator(200, "System metrics retrieved successfully", data));
-  } catch (error) {
-    res.status(500).json(responseGenerator(500, "Failed to retrieve system metrics", {
-      message: String(error),
-    }));
   }
 });
 

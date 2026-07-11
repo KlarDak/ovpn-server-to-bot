@@ -81,6 +81,17 @@ export function actionPath(): string {
 }
 
 /**
+ * Return OpenVPN management connection properties from environment variables
+ * @returns object - OpenVPN management connection properties
+ */
+export function vpnManagementPaths(): any {
+  return {
+    hostname: process.env.VPN_MANAGEMENT_HOSTNAME ?? "127.0.0.1",
+    port: Number(process.env.VPN_MANAGEMENT_PORT) ?? 7505,
+  };
+}
+
+/**
  * Return feedback webhook URL from environment variable
  * @returns string - feedback webhook URL
  */

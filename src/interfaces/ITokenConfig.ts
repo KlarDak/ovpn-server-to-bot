@@ -6,7 +6,6 @@ export interface ITokenConfig {
   aud: string; // Audience (server ID)
   iat: number; // Issued at (timestamp)
   exp: number; // Expiration time (timestamp)
-  role: "admin" | "user" | "guest" | "bot"; // User role
-  type: "create" | "recreate" | "update" | "delete" | "get" | "active" | "feedback"; // Token type
+  role: "admin" | "bot" | "site" | "user"; // User role
   uuid?: string; // Optional UUID for user identification
 }
