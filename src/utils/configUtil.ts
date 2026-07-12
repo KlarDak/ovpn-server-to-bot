@@ -1,5 +1,6 @@
 import type { IUserConfig } from "../interfaces/IUserConfig.js";
 import { pathDirs } from "./envUtil.js";
+import { consoleError } from "./resgenUtil.js";
 import SQLiteClient from "./sqliteUtil.js";
 
 class configFiles {
@@ -46,7 +47,7 @@ class configFiles {
             
             return row as IUserConfig;
         } catch (error) {
-            console.error("Error fetching user config:", error);
+            console.error(consoleError("Error fetching user config:", error));
             return false;
         }
     }
@@ -78,7 +79,7 @@ class configFiles {
             return true;
         }
         catch (error) {
-            console.error("Error creating users table:", error);
+            console.error(consoleError("Error creating users table:", error));
             return false;
         }
     }
@@ -115,7 +116,7 @@ class configFiles {
           
             return true;
         } catch (error) {
-            console.error("An error has been occurred during user config update:", error);
+            console.error(consoleError("An error has been occurred during user config update:", error));
             return false;
         }
     }
@@ -132,7 +133,7 @@ class configFiles {
             
             return true;
         } catch (error) {
-            console.error("An error has been occurred during user config deletion:", error);
+            console.error(consoleError("An error has been occurred during user config deletion:", error));
             return false;
         }
     }
@@ -144,7 +145,7 @@ class configFiles {
             return true;
         }
         catch (error) {            
-            console.error("User DB does not exist or is not accessible:", error);
+            console.error(consoleError("User DB does not exist or is not accessible:", error));
             return false;
         }
     }

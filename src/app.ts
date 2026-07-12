@@ -7,6 +7,7 @@ import { decodeToken } from './utils/jwtUtil.js';
 import configDownloadRouter from './routers/configDownloadRouter.js';
 import activeRouter from './routers/activeRouter.js';
 import serverRouter from "./routers/serverRouter.js";
+import './extensions/responseGenerator.js';
 
 const app = express();
 
@@ -23,27 +24,21 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 app.use((req: Request, res: Response, next: NextFunction) => {
     if (!["GET", "POST", "PUT", "PATCH", "DELETE"].includes(req.method)) {
-        return res
-          .status(405)
-          .json(responseGenerator(405, "Method Not Allowed"));
+        return res.sendServerJson(405, "METHOD_NOT_ALLOWED");
     }
     
     if (!["GET", "DELETE"].includes(req.method) && Object.keys(req.body ?? []).length === 0) {
-        return res
-          .status(400)
-          .json(responseGenerator(400, "Request body is missing"));
+        return res.sendServerJson(400, "REQUEST_BODY_MISSING");
     }
 
     if (!req.headers.authorization) {
-        return res
-          .status(401)
-          .json(responseGenerator(403, "Authorization header missing"));
+        return res.sendServerJson(403, "AUTH_HEADER_MISSING");
     }
 
     const decodedToken = decodeToken(req.headers.authorization as string);
     
     if (!decodedToken) {
-        return res.status(401).json(responseGenerator(401, "Invalid authorization token format"));
+        return res.sendServerJson(401, "INVALID_TOKEN_FORMAT");
     }
 
     (req as any).tokenPayload = decodedToken;

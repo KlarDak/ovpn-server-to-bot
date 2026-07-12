@@ -1,6 +1,5 @@
 import Router from 'express';
 import type { Request, Response, NextFunction } from 'express';
-import { responseGenerator } from '../utils/resgenUtil.js';
 import { deleteUserConfig, getUserConfig, patchUserConfig, postUserConfig, putUserConfig } from '../services/configsServices.js';
 
 const usersRouter = Router();
@@ -10,14 +9,7 @@ const usersRouter = Router();
  */
 usersRouter.use((req: Request, res: Response, next: NextFunction) => {
     if (!["admin", "bot"].includes((req as any).tokenPayload.role)) {
-      return res
-        .status(403)
-        .json(
-          responseGenerator(
-            403,
-            "Access denied: insufficient permissions. Change endpoint or use an admin token.",
-          ),
-        );
+      return res.sendServerJson(403, "INSUFFICIENT_PERMISSIONS");
     }
 
     return next();
@@ -31,7 +23,7 @@ usersRouter.get("/:uuid", (req: Request, res: Response) => {
     const uuid = req.params.uuid as string;
     const getConfig = getUserConfig(uuid);
 
-    return res.status(getConfig.code).json(getConfig);
+    return res.sendServerJson(getConfig);
 });
 
 /**
@@ -41,7 +33,7 @@ usersRouter.post("/", async (req: Request, res: Response) => {
     const { uuid, type, time } = req.body;
     const postConfig = await postUserConfig(uuid, type, time);
 
-    return res.status(postConfig.code).json(postConfig);
+    return res.sendServerJson(postConfig);
 });
 
 /**
@@ -52,7 +44,7 @@ usersRouter.put("/:uuid", async (req: Request, res: Response) => {
     const uuid = req.params.uuid as string;
     const putConfig = await putUserConfig(uuid, type, time);
 
-    return res.status(putConfig.code).json(putConfig);
+    return res.sendServerJson(putConfig);
 });
 
 /**
@@ -64,7 +56,7 @@ usersRouter.patch("/:uuid", async (req: Request, res: Response) => {
     
     const patchConfig = await patchUserConfig(uuid, type, time);
 
-    return res.status(patchConfig.code).json(patchConfig);
+    return res.sendServerJson(patchConfig);
 });
 
 /**
@@ -75,7 +67,7 @@ usersRouter.delete("/:uuid", async (req: Request, res: Response) => {
 
     const deleteConfig = await deleteUserConfig(uuid);
 
-    return res.status(deleteConfig.code).json(deleteConfig);
+    return res.sendServerJson(deleteConfig);
 });
 
 export default usersRouter;

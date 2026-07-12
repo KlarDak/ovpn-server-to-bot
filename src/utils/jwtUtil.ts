@@ -1,7 +1,8 @@
 import jsonwebtoken from "jsonwebtoken";
 import { keyStats, subIndex } from "./envUtil.js";
 import { verifyPayloadKeys } from "./verifyUtil.js";
-import type { ITokenConfig } from "../interfaces/ITokenConfig.js";
+import type { ITokenConfig } from "../interfaces/ITokenAuth.js";
+import { consoleError } from "./resgenUtil.js";
 
 /**
  * Decrypt the given JWT token using the secret key from environment variable
@@ -14,7 +15,7 @@ export function decryptToken(token: string): any {
         return decoded;
     }
     catch (error) {
-        console.log("An error has been occurred during token decryption:", error);
+        console.error(consoleError("An error has been occurred during token decryption:", error));
         return false;
     }
 }
@@ -35,7 +36,7 @@ export function decodeToken(token: string): any {
         return (decodedToken as ITokenConfig);
     }
     catch (error) {
-        console.error("An error has been occurred during token decoding:", error);
+        console.error(consoleError("An error has been occurred during token decoding:", error));
         return false;
     }
 }
@@ -53,7 +54,12 @@ export function encodeToken(sub: string, role: string): string | false {
         return token;
     }
     catch (error) {
-        console.error("An error has been occurred during token encoding:", error);
+        console.error(
+          consoleError(
+            "An error has been occurred during token encoding:",
+            error,
+          ),
+        );
         return false;
     }
 }

@@ -1,4 +1,4 @@
-import type { ITokenConfig } from "../interfaces/ITokenConfig.js";
+import type { ITokenConfig } from "../interfaces/ITokenAuth.js";
 
 /**
  * Verify if the given UUID string is in a valid format, which consists of 32 hexadecimal characters separated by hyphens in the pattern of 8-4-4-4-12. The function uses a regular expression to check if the input string matches the expected UUID format, and returns true if it does, or false if it does not.
@@ -33,4 +33,8 @@ export function verifyRequiredFields(obj: any, requiredFields: string[]): boolea
     }
 
     return true;
+}
+
+export function verifyShortLink(slink: string): boolean {
+    return /^[A-Za-z0-9]{6}$/.test(slink);
 }

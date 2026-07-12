@@ -1,4 +1,4 @@
-import type { IResponseConfig } from "../interfaces/IResponseConfig.js";
+import type { IResponseConfig } from "../interfaces/IResponseArray.js";
 
 /**
  * Generate a standardized response object with the given status code, message and optional data, which can be used for API responses or other purposes.

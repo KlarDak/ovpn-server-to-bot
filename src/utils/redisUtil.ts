@@ -24,10 +24,7 @@ class RedisUtil {
     });
 
     this.redisConn.on("error", (error) => {
-      console.error(
-        `Redis connection has been destroyed in ${new Date(Date.now()).toISOString()}: `,
-        error,
-      );
+      console.error(consoleError(`Redis connection has been destroyed in ${new Date(Date.now()).toISOString()}: `, error));
     });
 
     this.redisConn.on("connection", () => {

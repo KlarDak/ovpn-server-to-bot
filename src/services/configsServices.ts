@@ -1,4 +1,4 @@
-import type { IResponseConfig } from "../interfaces/IResponseConfig.js";
+import type { IResponseConfig } from "../interfaces/IResponseArray.js";
 import type { IUserConfig } from "../interfaces/IUserConfig.js";
 import { configFiles } from "../utils/configUtil.js";
 import { createFile, deleteFile, isFileExist, updateFile } from "../utils/filesUtil.js";

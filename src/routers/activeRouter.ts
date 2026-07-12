@@ -4,10 +4,7 @@ import { responseGenerator } from "../utils/resgenUtil.js";
 import { verifyUuidFormat } from "../utils/verifyUtil.js";
 import { getConnectedClients, kickUser } from "../services/doActionUser.js";
 import { configFiles } from "../utils/configUtil.js";
-<<<<<<< HEAD
-=======
 import { subIndex } from "../utils/envUtil.js";
->>>>>>> 3a5dcc4 (dev-2.1)
 
 const activeRouter = Router();
 
@@ -16,7 +13,11 @@ const activeRouter = Router();
  */
 activeRouter.use((req: Request, res: Response, next: NextFunction) => {
     if (!(req as any).tokenPayload.role.includes("admin")) {
-        return res.status(403).json(responseGenerator(403, "Access denied: insufficient permissions. Change endpoint or use an admin token."));
+        return res.sendServerJson(403, "INSUFFICIENT_PERMISSIONS");
+    }
+
+    if (req.method === "POST") {
+
     }
 
     return next();
@@ -26,7 +27,7 @@ activeRouter.use((req: Request, res: Response, next: NextFunction) => {
  * Handle GET requests to the "/status/" endpoint to check the status of various server functions. The route checks if the user has the appropriate "check" type in their token payload, and if so, it attempts to connect to a Redis server, checks for the existence of certain directories, and executes a command to check if the OpenVPN process is active. The results of these checks are compiled into a JSON response indicating the status of each function, along with a timestamp and server information. If any errors occur during the checks, it responds with a 500 status code and an error message.
  */
 activeRouter.get("/", async (_, res: Response) => {
-     return res.status(200).json(responseGenerator(200, "Active users endpoint is working"));
+     return res.sendServerJson(200, "Active users endpoint is working");
 });
 
 /**
@@ -57,20 +58,12 @@ activeRouter.get("/list", async (_req: Request, res: Response) => {
 activeRouter.post("/kick", async (req: Request, res: Response) => {
   const { uuid } = req.body;
 
-  if (!uuid || !verifyUuidFormat(uuid)) {
-    return res
-      .status(400)
-      .json(responseGenerator(400, "Invalid or missing uuid."));
-  }
-
   try {
     await kickUser(uuid);
 
-    return res.status(200).json(responseGenerator(200, "User kicked successfully."));
+    return res.sendServerJson(200, "USER_KICKED");
   } catch (error) {
-    return res.status(500).json(responseGenerator(500, "Failed to kick user", {
-        info: error,
-      }));
+    return res.sendServerJson(500, "USER_KICK_FAILED", {info: error});
   }
 });
 
