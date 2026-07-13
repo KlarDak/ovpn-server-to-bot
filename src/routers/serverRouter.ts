@@ -57,6 +57,7 @@ serverRouter.get("/status/", async (_, res: Response) => {
       );
     });
   } catch (error) {
+    console.serverError("serverRouter", error);
     return res.sendServerJson(500, "SERVER_STATE_FETCH_FAILED", error);
   }
 });
@@ -120,6 +121,7 @@ serverRouter.get("/metrics", async (_req: Request, res: Response) => {
 
     res.sendServerJson(200, "METRICS_RETRIEVED", serverLoads);
   } catch (error) {
+    console.serverError("serverRouter", error);
     res.sendServerJson(500, "SERVER_STATE_FETCH_FAILED", error);
   }
 });

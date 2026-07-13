@@ -11,7 +11,7 @@ const configDownloadRouter = Router();
  */
 configDownloadRouter.get("/:shortlink", async (req: Request, res: Response) => {
   if (!(req as any).tokenPayload.role.includes("site")) {
-    return res.sendServerJson(403, "INVALID_USER_ROLE");
+    return res.sendServerJson(403, "INSUFFICIENT_PERMISSIONS");
   }
 
   if (verifyShortLink(req.body.link)) {

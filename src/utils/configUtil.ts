@@ -1,6 +1,5 @@
 import type { IUserConfig } from "../interfaces/IUserConfig.js";
 import { pathDirs } from "./envUtil.js";
-import { consoleError } from "./resgenUtil.js";
 import SQLiteClient from "./sqliteUtil.js";
 
 class configFiles {
@@ -47,7 +46,7 @@ class configFiles {
             
             return row as IUserConfig;
         } catch (error) {
-            console.error(consoleError("Error fetching user config:", error));
+            console.serverError("configUtil", error);
             return false;
         }
     }
@@ -79,7 +78,7 @@ class configFiles {
             return true;
         }
         catch (error) {
-            console.error(consoleError("Error creating users table:", error));
+            console.serverError("configUtil", error);
             return false;
         }
     }
@@ -87,7 +86,7 @@ class configFiles {
      * Update user-config file
      * @param uuid - UUID of user
      * @param time - time in seconds for config expiration (from now)
-     * @param type - type of user ( admin | user | guest )
+     * @param type - type of user ( unblocked | user | unlimit )
      * @returns boolean - true if updated, false if error
      */
     static async update(uuid: string, time?: number, type?: string, ban?: boolean): Promise<boolean> {
@@ -98,7 +97,7 @@ class configFiles {
                 updates.expired_time = new Date(Date.now() + time * 1000).toISOString();
             }
 
-            if (type && ["admin", "user", "guest"].includes(type)) {
+            if (type && ["unblocked", "user", "unlimit"].includes(type)) {
                 updates.user_type = type;
             }
 
@@ -116,7 +115,7 @@ class configFiles {
           
             return true;
         } catch (error) {
-            console.error(consoleError("An error has been occurred during user config update:", error));
+            console.serverError("configUtil", error);
             return false;
         }
     }
@@ -133,7 +132,7 @@ class configFiles {
             
             return true;
         } catch (error) {
-            console.error(consoleError("An error has been occurred during user config deletion:", error));
+            console.serverError("configUtil", error);
             return false;
         }
     }
@@ -145,7 +144,7 @@ class configFiles {
             return true;
         }
         catch (error) {            
-            console.error(consoleError("User DB does not exist or is not accessible:", error));
+            console.serverError("configUtil", error);
             return false;
         }
     }

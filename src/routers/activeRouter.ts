@@ -1,6 +1,5 @@
 import Router from "express";
 import type { NextFunction, Request, Response } from "express";
-import { responseGenerator } from "../utils/resgenUtil.js";
 import { verifyUuidFormat } from "../utils/verifyUtil.js";
 import { getConnectedClients, kickUser } from "../services/doActionUser.js";
 import { configFiles } from "../utils/configUtil.js";
@@ -17,7 +16,9 @@ activeRouter.use((req: Request, res: Response, next: NextFunction) => {
     }
 
     if (req.method === "POST") {
-
+      if (!req.body.uuid || !verifyUuidFormat(req.body.uuid)) {
+        return res.sendServerJson(400, "INVALID_UUID");
+      }
     }
 
     return next();
@@ -36,19 +37,21 @@ activeRouter.get("/", async (_, res: Response) => {
 activeRouter.get("/list", async (_req: Request, res: Response) => {
   try {
     const clients = await getConnectedClients();
-
-    res.status(200).json(responseGenerator(200, "List of active users retrieved successfully", {
+    const serverStatus = {
       date: new Date().toISOString(),
       server_number: 1,
       server_code: subIndex(),
       count: clients.length,
       active_users: clients,
-    }));
+    };
+
+    return res.sendServerJson(200, "ACTIVE_USERS_RETRIEVED", serverStatus);
   } catch (error: any) {
-    res.status(500).json(responseGenerator(500, "Failed to get active users", {
-        message: error?.message,
-        raw: String(error),
-      }));
+    console.serverError("activeRouter", error);
+    return res.sendServerJson(500, "ACTIVE_USERS_FETCH_FAILED", {
+      message: error?.message,
+      raw: String(error),
+    });
   }
 });
 
@@ -63,6 +66,7 @@ activeRouter.post("/kick", async (req: Request, res: Response) => {
 
     return res.sendServerJson(200, "USER_KICKED");
   } catch (error) {
+    console.serverError("activeRouter", error);
     return res.sendServerJson(500, "USER_KICK_FAILED", {info: error});
   }
 });
@@ -70,23 +74,17 @@ activeRouter.post("/kick", async (req: Request, res: Response) => {
 activeRouter.post("/ban", async (req: Request, res: Response) => {
   const { uuid } = req.body;
 
-  if (!uuid || !verifyUuidFormat(uuid)) {
-    return res
-      .status(400)
-      .json(responseGenerator(400, "Invalid or missing uuid."));
-  }
-
   try {
-
     configFiles.update(uuid, 0, "user", true);
 
     await kickUser(uuid);
 
-    return res.status(200).json(responseGenerator(200, "User banned successfully."));
+    return res.sendServerJson(200, "USER_BANNED");
   } catch (error) {
-    return res.status(500).json(responseGenerator(500, "Failed to ban user", {
-        info: error,
-      }));
+    console.serverError("activeRouter", error);
+    return res.sendServerJson(500, "USER_BAN_FAILED", {
+      info: error
+    });
   }
 });
 
@@ -96,20 +94,15 @@ activeRouter.post("/ban", async (req: Request, res: Response) => {
 activeRouter.post("/pardon", async (req: Request, res: Response) => {
   const { uuid } = req.body;
 
-  if (!uuid || !verifyUuidFormat(uuid)) {
-    return res
-      .status(400)
-      .json(responseGenerator(400, "Invalid or missing uuid."));
-  }
-
   try {
     configFiles.update(uuid, 0, "active", false);
 
-    return res.status(200).json(responseGenerator(200, "User pardoned successfully."));
+    return res.sendServerJson(200, "USER_PARDONNED");
   } catch (error) {
-    return res.status(500).json(responseGenerator(500, "Failed to pardon user", {
-        info: error,
-      }));
+    console.serverError("activeRouter", error);
+    return res.sendServerJson(500, "USER_PARDON_FAILED", {
+      info: error
+    });
     }
 });
 

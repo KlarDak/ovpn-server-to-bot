@@ -8,17 +8,23 @@ import { redisPaths } from './envUtil.js';
  * @returns string | false - generated short link if encoding is successful, false otherwise
  */
 export async function encodeLink(uuid: string, time: number): Promise<string | false> {
-    const redisConnection = new RedisUtil(redisPaths().hostname, redisPaths().port);
-    await redisConnection.connect();
-    const linkCreated = generateSymbol(6); 
+    try {
+        const redisConnection = new RedisUtil(redisPaths().hostname, redisPaths().port);
+        await redisConnection.connect();
+        const linkCreated = generateSymbol(6); 
 
-    const isSet = await redisConnection.set(`sl:${linkCreated}`, uuid, time);
-    redisConnection.disconnect();
+        const isSet = await redisConnection.set(`sl:${linkCreated}`, uuid, time);
+        redisConnection.disconnect();
 
-    if (isSet) {
-        return linkCreated;
+        if (isSet) {
+            return linkCreated;
+        }
+        else {
+            return false;
+        }
     }
-    else {
+    catch(error: any) {
+        console.serverError("slinkUtil", error);
         return false;
     }
 }
@@ -29,18 +35,24 @@ export async function encodeLink(uuid: string, time: number): Promise<string | f
  * @returns string | false - associated UUID if the short link is valid and retrieval is successful, false otherwise
  */
 export async function decodeLink(slink: string): Promise<string | false> {
-    const redisConnection = new RedisUtil(redisPaths().hostname, redisPaths().port);    
-    await redisConnection.connect();
+    try {
+        const redisConnection = new RedisUtil(redisPaths().hostname, redisPaths().port);    
+        await redisConnection.connect();
 
-    const getLink = await redisConnection.get(`sl:${slink}`); 
-    await redisConnection.del(`sl:${slink}`);
-    await redisConnection.disconnect();
-    
-    if (!getLink) {
-        return false;
+        const getLink = await redisConnection.get(`sl:${slink}`); 
+        await redisConnection.del(`sl:${slink}`);
+        await redisConnection.disconnect();
+        
+        if (!getLink) {
+            return false;
+        }
+        else {
+            return getLink;
+        }
     }
-    else {
-        return getLink;
+    catch(error) {
+        console.serverError("slinkUtil", error);
+        return false;
     }
 }
 

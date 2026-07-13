@@ -2,7 +2,6 @@ import express from 'express';
 import type { Request, Response, NextFunction } from 'express';
 import { allowedIps, serverProps } from './utils/envUtil.js';
 import usersRouter from './routers/usersRouter.js';
-import { responseGenerator } from './utils/resgenUtil.js';
 import { decodeToken } from './utils/jwtUtil.js';
 import configDownloadRouter from './routers/configDownloadRouter.js';
 import activeRouter from './routers/activeRouter.js';
@@ -16,7 +15,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     const ip: string = req.ip || "";
 
     if (!allowedIps().includes(ip)) {
-        return res.status(403).json({ error: "Access denied by IP", ip: ip });
+        return res.sendServerJson(403, "IP_ACCESS_DENIED", {ip: ip});
     }
     
     return next();

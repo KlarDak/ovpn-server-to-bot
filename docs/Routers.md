@@ -24,9 +24,9 @@ GET /api/config/:uuid
 
 ```json
 {
-    "code": 404,    
+    "code": 200,    
     "data": null,    
-    "message": "Configuration file not found"
+    "message": "USER_CONFIG_RETRIEVEDd"
 }
 ```
 
@@ -53,7 +53,7 @@ POST /api/config
         "uuid": "430a8e06-d9b6-11f0-a8db-38f3ab6d0b91",
         "link": "6SM0Yj"
     },
-    "message": "User configuration created successfully"
+    "message": "USER_CONFIGURATION_CREATED"
 }
 ```
 
@@ -83,7 +83,7 @@ PUT /api/config/:uuid
         "uuid": "430a8e06-d9b6-11f0-a8db-38f3ab6d0b72",
         "link": "FD7DaT"
     },
-    "message": "User configuration updated successfully"
+    "message": "USER_CONFIGURATION_UPDATED"
 }
 ```
 
@@ -112,7 +112,7 @@ PATCH /api/config/:uuid
     "data": {
         "uuid": "430a8e06-d9b6-11f0-a8db-38f3ab6d0b72"
     },
-    "message": "User configuration updated successfully"
+    "message": "USER_CONFIGURATION_UPDATED"
 }
 ```
 
@@ -134,7 +134,7 @@ DELETE /api/config/:uuid
     "data": {
         "uuid": "430a8e06-d9b6-11f0-a8db-38f3ab6d0b72"
     },
-    "message": "User configuration deleted successfully"
+    "message": "USER_CONFIGURATION_DELETED"
 }
 ```
 
@@ -167,7 +167,7 @@ GET /api/server/status
         "isConfigsDirExists": true,
         "isOVPNActive": true
     },
-    "message": "Set status of all server's functions"
+    "message": "SERVER_FUNCTIONS_STATUS_SET"
 }
 ```
 
@@ -219,7 +219,7 @@ GET /api/server/metrics
         },
         "uptime_seconds": 57176.24
     },
-    "message": "System metrics retrieved successfully"
+    "message": "METRICS_RETRIEVED"
 }
 ```
 
@@ -250,12 +250,12 @@ GET /api/active/list
 ```json
 {
     "code": 200,
-    "message": "List of active users retrieved successfully",
+    "message": "ACTIVE_USERS_RETRIEVED",
     "data": {
         "date": "2026-07-10T17:42:27.579Z",
         "server_number": 1,
         "server_code": "nln_ru_01",
-        "count": 1,
+        "count": 3,
         "active_users": [
             {
                 "uuid": "430a8e06-d9b6-11f0-a8db-38f3ab6d0b72",
@@ -265,6 +265,7 @@ GET /api/active/list
                 "bytesReceived": 102,
                 "bytesSent": 51
             }
+            ...
         ]
     }
 }
@@ -296,7 +297,7 @@ POST /api/active/kick
 ```json
 {
     "code": 200,
-    "message": "User kicked successfully."
+    "message": "USER_KICKED"
 }
 ```
 
@@ -315,7 +316,7 @@ POST /api/active/ban
 ```json
 {
     "code": 200,
-    "message": "User banned successfully."
+    "message": "USER_BANNED"
 }
 ```
 
@@ -334,7 +335,7 @@ POST /api/active/pardon
 ```json
 {
     "code": 200,
-    "message": "User pardoned successfully."
+    "message": "USER_PARDONNED"
 }
 ```
 
@@ -350,6 +351,35 @@ GET /api/download/:shortlink
 
 В качестве ответа возвращает содержимое ``.ovpn``-файла.
 
+## Ответы с ошибками
+
+В случае ошибок по эндпоинту ``/api/server`` в ``data`` передаются определённые ключи для ошибок.
+
+**Пример с ``message`` и ``raw``:**
+
+```json
+{
+    "code": 500,
+    "message": "ACTIVE_USERS_FETCH_FAILED",
+    "data": {
+      "message": "Информация об ошибке",
+      "raw": "Полные данные об ошибке",
+    }
+}
+```
+
+**Пример с ``info``:**
+
+```json
+{
+    "code": 500,
+    "message": "USER_KICK_FAILED",
+    "data": {
+      "info": "Полные данные об ошибке",
+    }
+}
+```
+
 ## Допустимые ответы и ошибки
 
-Список допустимых положительных ответов и ошибок с подробным описанием возможной причины указаны в файле [Exceptions.md](Exceptions.md).
+Список допустимых положительных ответов и ошибок с описанием возможной причины указаны в файле [Exceptions.md](Exceptions.md).

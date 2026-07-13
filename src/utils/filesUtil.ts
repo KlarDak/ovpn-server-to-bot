@@ -3,7 +3,6 @@ import { configPath, pathDirs } from "./envUtil.js";
 import fs from "fs";
 import path from "path";
 import { promisify } from "util";
-import { consoleError } from "./resgenUtil.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -40,7 +39,7 @@ export async function createFile(uuid: string) : Promise<boolean> {
     const newUser = await execFileAsync("sudo", [configPath(), "create", uuid]);
 
     if (newUser.stderr) {
-        console.error(consoleError("An error has been occurred during file creation:", newUser.stderr));
+        console.serverError("filesUtil", newUser.stderr);
         return false;
     }
     else {
@@ -61,7 +60,7 @@ export async function updateFile(uuid: string): Promise<boolean> {
     const newUser = await execFileAsync("sudo", [configPath(), "update", uuid]);
 
     if (newUser.stderr) {
-      console.error(consoleError("An error has been occurred during file updating:", newUser.stderr));
+      console.serverError("filesUtil", newUser.stderr);
       return false;
     } else {
       return true;
@@ -80,7 +79,7 @@ export async function deleteFile(uuid: string): Promise<boolean> {
 
     const newUser = await execFileAsync("sudo", [configPath(), "delete", uuid]);
     if (newUser.stderr) {
-      console.error(consoleError("An error has been occurred during file deletion:", newUser.stderr,));
+      console.serverError("filesUtil", newUser.stderr);
       return false;
     } else {
       return true;

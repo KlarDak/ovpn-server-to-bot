@@ -1,5 +1,4 @@
 import { createClient, type RedisClientType } from "redis";
-import { consoleError } from "./resgenUtil.js";
 
 /**
  * RedisUtil class provides methods to interact with Redis database, including connecting, pinging, getting, setting, deleting keys and disconnecting from the database.
@@ -24,7 +23,7 @@ class RedisUtil {
     });
 
     this.redisConn.on("error", (error) => {
-      console.error(consoleError(`Redis connection has been destroyed in ${new Date(Date.now()).toISOString()}: `, error));
+      console.serverError("redisUtil", error);
     });
 
     this.redisConn.on("connection", () => {
@@ -44,7 +43,7 @@ class RedisUtil {
         return false;
       }
     } catch (error: any) {
-      console.error(consoleError("Redis-connect", error));
+      console.serverError("redisUtil", error);
       return false;
     }
   }
@@ -57,7 +56,7 @@ class RedisUtil {
     try {
       return await this.redisConn.ping();
     } catch (error: any) {
-      console.error(consoleError("Redis-ping", error));
+      console.serverError("redisUtil", error);
       return false;
     }
   }
@@ -71,7 +70,7 @@ class RedisUtil {
     try {
       return await this.redisConn.get(key);
     } catch (error: any) {
-      console.error(consoleError("Redis-get", error));
+      console.serverError("redisUtil", error);
       return null;
     }
   }
@@ -93,7 +92,7 @@ class RedisUtil {
           : false;
       }
     } catch (error: any) {
-      console.error(consoleError("Redis-set", error));
+      console.serverError("redisUtil", error);
       return false;
     }
   }
@@ -107,7 +106,7 @@ class RedisUtil {
     try {
       return (await this.redisConn.del(key)) ?? false;
     } catch (error: any) {
-      console.error(consoleError("Redis-del", error));
+      console.serverError("redisUtil", error);
       return 0;
     }
   }
@@ -121,7 +120,7 @@ class RedisUtil {
     try {
       return (await this.redisConn.exists(key)) ? true : false;
     } catch (error: any) {
-      console.error(consoleError("Redis-del", error));
+      console.serverError("redisUtil", error);
       return false;
     }
   }
@@ -138,7 +137,7 @@ class RedisUtil {
         return false;
       }
     } catch (error: any) {
-      console.error(consoleError("Redis-disconnect", error));
+      console.serverError("redisUtil", error);
       return false;
     }
   }

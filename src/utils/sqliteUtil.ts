@@ -1,5 +1,4 @@
 import sqlite3 from "sqlite3";
-import { consoleError } from "./resgenUtil.js";
 
 /**
  * A utility class for interacting with a SQLite database, providing methods for executing SQL queries and performing CRUD operations on the database. The class establishes a connection to the specified SQLite database file upon instantiation, and provides methods for running SQL queries, retrieving single or multiple records, and performing create, read, update and delete operations on the database tables. The class also includes error handling for database operations, logging any errors that occur during query execution or connection establishment.
@@ -13,7 +12,7 @@ class SQLiteClient {
      */
     constructor(dbFile: string) {
         this.db = new sqlite3.Database(dbFile, (err) => {
-            if (err) console.error(consoleError("DB connect error:", err.message));
+            if (err) console.serverError("sqliteUtil", err.message);
         });
     } 
 
