@@ -7,6 +7,7 @@ import configDownloadRouter from './routers/configDownloadRouter.js';
 import activeRouter from './routers/activeRouter.js';
 import serverRouter from "./routers/serverRouter.js";
 import './extensions/responseGenerator.js';
+import { configFiles } from './utils/configUtil.js';
 
 const app = express();
 
@@ -55,5 +56,6 @@ app.get("/", (_, res: Response) => {
 });
 
 app.listen(serverProps().port, serverProps().hostname, () => {
+    configFiles.createTable();
     console.log(`Server running at http://${serverProps().hostname}:${serverProps().port}/`);
 });
