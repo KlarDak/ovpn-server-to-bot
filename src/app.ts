@@ -7,6 +7,7 @@ import configDownloadRouter from './routers/configDownloadRouter.js';
 import activeRouter from './routers/activeRouter.js';
 import serverRouter from "./routers/serverRouter.js";
 import './extensions/responseGenerator.js';
+import getConfigRouter from './routers/getConfigRouter.js';
 
 const app = express();
 
@@ -30,25 +31,28 @@ app.use((req: Request, res: Response, next: NextFunction) => {
         return res.sendServerJson(400, "REQUEST_BODY_MISSING");
     }
 
-    if (!req.headers.authorization) {
-        return res.sendServerJson(403, "AUTH_HEADER_MISSING");
-    }
+    if (!req.path.startsWith("/getConfig")) {
+        if (!req.headers.authorization) {
+          return res.sendServerJson(403, "AUTH_HEADER_MISSING");
+        }
 
-    const decodedToken = decodeToken(req.headers.authorization as string);
-    
-    if (!decodedToken) {
-        return res.sendServerJson(401, "INVALID_TOKEN_FORMAT");
-    }
+        const decodedToken = decodeToken(req.headers.authorization as string);
 
-    (req as any).tokenPayload = decodedToken;
+        if (!decodedToken) {
+          return res.sendServerJson(401, "INVALID_TOKEN_FORMAT");
+        }
+
+        (req as any).tokenPayload = decodedToken;
+    }
 
     return next();
 });
 
-app.use("/api/download/", configDownloadRouter);
-app.use("/api/config/", usersRouter);
-app.use("/api/server/", serverRouter);
-app.use("/api/active/", activeRouter);
+app.use("/api/download", configDownloadRouter);
+app.use("/getConfig", getConfigRouter);
+app.use("/api/config", usersRouter);
+app.use("/api/server", serverRouter);
+app.use("/api/active", activeRouter);
 
 app.get("/", (_, res: Response) => {
   res.send("Welcome to the secure server! Use the API endpoints to interact with the server.");
