@@ -31,7 +31,6 @@ serverRouter.get("/status/", async (_, res: Response) => {
     );
     await redisConnect.connect();
 
-    configFiles.createTable();
     const redisStatus: boolean =
       (await redisConnect.ping()) === "PONG" ? true : false;
     const configsDirExists: boolean = isDirExists();
