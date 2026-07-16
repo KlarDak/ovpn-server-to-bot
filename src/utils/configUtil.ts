@@ -13,10 +13,6 @@ class configFiles {
      * @returns boolean - true if created, false if error
      */
     static create(uuid: string, type: string, time: number): boolean {
-        if (!["admin", "user", "guest"].includes(type) && time <= 0) {
-            return false;
-        }
-
         this.userDB.create("users", {
             uuid: uuid,
             user_type: type,
@@ -40,6 +36,7 @@ class configFiles {
               "SELECT * FROM users WHERE uuid = ?",
               [uuid],
             );
+
             if (!row) {
                 return false;
             } 

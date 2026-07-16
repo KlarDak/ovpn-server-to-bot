@@ -10,12 +10,12 @@ import { encodeLink } from "../utils/slinkUtil.js";
  * @param uuid - unique identifier for the user configuration, which should be in a valid UUID format
  * @returns IResponseConfig - standardized response object containing the status code, message and user configuration data if retrieval is successful, or an appropriate error message if retrieval fails due to invalid UUID format or non-existent configuration file
  */
-export function getUserConfig(uuid: string): IResponseConfig {
+export async function getUserConfig(uuid: string): Promise<IResponseConfig> {
     if (!isFileExist(uuid)) {
       return responseGenerator(404, "CONFIG_FILE_NOT_FOUND");
     }
     
-    const userParams = configFiles.get(uuid) ?? ({} as IUserConfig);
+    const userParams = await configFiles.get(uuid) ?? ({} as IUserConfig);
 
     return responseGenerator(200, "USER_CONFIG_RETRIEVED", userParams);
 }
