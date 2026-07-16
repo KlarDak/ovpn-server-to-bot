@@ -58,6 +58,13 @@ app.get("/", (_, res: Response) => {
   res.send("Welcome to the secure server! Use the API endpoints to interact with the server.");
 });
 
+app.use((req, res, _) => {
+    res.sendServerJson(404, "NOT_FOUND", {
+        method: req.method,
+        path: req.path,
+    });
+});
+
 app.listen(serverProps().port, serverProps().hostname, () => {
     console.log(`Server running at http://${serverProps().hostname}:${serverProps().port}/`);
 });
