@@ -20,20 +20,24 @@ if [[ ! "$USER" =~ ^[a-zA-Z0-9_-]+$ ]]; then
     exit 2;
 fi
 
-CA="$OVPN_SERVER/pki/ca.crt"
-TLS="$OVPN_SERVER/ta.key"
+CA="$OVPN_SERVER/ca.crt"
+TLS="$OVPN_SERVER/tls-crypt.key"
 
 CERT="$OVPN_SERVER/easy-rsa/pki/issued/$USER.crt"
 KEY="$OVPN_SERVER/easy-rsa/pki/private/$USER.key"
 REQS="$OVPN_SERVER/easy-rsa/pki/reqs/$USER.req" # FOR CHECK AND CLEAR
 OUT="$CONFIGS_DIR/$USER.ovpn"
 
+cd "${OVPN_SERVER}/easy-rsa"
+
 if [ "$ACTION" = "create" ]; then
     if [ -f "$REQS" ]; then
         exit 3;
     fi
 
-    ./easyrsa build-client-full $USER nopass
+    ./easyrsa --batch build-client-full $USER nopass
+    ./easyrsa gen-crl
+    cp pki/crl.pem $OVPN_SERVER
 
     sed \
     -e "/^{CA_CERT}$/{
@@ -95,7 +99,14 @@ if [ "$ACTION" = "revoke" ]; then
         exit 3;
     fi
 
-    rm $CERT $KEY $REQS
+    rm "$OUT";
+    cd "${OVPN_SERVER}/easy-rsa/";
+
+    IS_BANNED=$(sqlite3 "$DB_SERVER" "SELECT status FROM users WHERE uuid = '$USER' LIMIT 1;");
+
+    ./easyrsa --batch revoke $USER
+    ./easyrsa gen-crl
+    cp -f pki/crl.pem "$OVPN_SERVER"
 
     exit 0;
 fi
