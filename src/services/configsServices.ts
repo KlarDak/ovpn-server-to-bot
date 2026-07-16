@@ -42,7 +42,7 @@ export async function postUserConfig(uuid: string, type: string, time: number): 
         return responseGenerator(500, "CONFIG_FILE_CREATION_FAILED");
     }
 
-    const userConfigCreated = configFiles.create(uuid, type, time);
+    const userConfigCreated = await configFiles.create(uuid, type, time);
 
     if (!userConfigCreated) {
         return responseGenerator(500, "DATABASE_RECORD_CREATION_FAILED");
@@ -78,7 +78,7 @@ export async function putUserConfig(uuid: string, type: string, time: number): P
         return responseGenerator(500, "CONFIG_FILE_UPDATE_FAILED")
     }
 
-    const updatedUserConfig = configFiles.update(uuid, time, type);
+    const updatedUserConfig = await configFiles.update(uuid, {user_type: type as string, time: time as number});
 
     if (!updatedUserConfig) {
         return responseGenerator(500, "DATABASE_RECORD_UPDATE_FAILED")
@@ -106,7 +106,7 @@ export async function patchUserConfig(uuid: string, time?: number, type?: string
       return responseGenerator(409, "CONFIG_FILE_NOT_FOUND");
     }
 
-    const updatedUserConfig = configFiles.update(uuid, time, type);
+    const updatedUserConfig = await configFiles.update(uuid, {user_type: type as string, time: time as number});
 
     if (!updatedUserConfig) {
       return responseGenerator(500, "DATABASE_RECORD_UPDATE_FAILED");

@@ -63,6 +63,7 @@ activeRouter.post("/kick", async (req: Request, res: Response) => {
 
   try {
     await kickUser(uuid);
+    await configFiles.update(uuid, {status: "inactive"});
 
     return res.sendServerJson(200, "USER_KICKED");
   } catch (error) {
@@ -75,7 +76,7 @@ activeRouter.post("/ban", async (req: Request, res: Response) => {
   const { uuid } = req.body;
 
   try {
-    configFiles.update(uuid, 0, "user", true);
+    configFiles.update(uuid, {status: "banned"});
 
     await kickUser(uuid);
 
@@ -95,7 +96,7 @@ activeRouter.post("/pardon", async (req: Request, res: Response) => {
   const { uuid } = req.body;
 
   try {
-    configFiles.update(uuid, 0, "active", false);
+    configFiles.update(uuid, {status: "active"});
 
     return res.sendServerJson(200, "USER_PARDONNED");
   } catch (error) {
