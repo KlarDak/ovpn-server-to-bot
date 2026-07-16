@@ -19,9 +19,9 @@ usersRouter.use((req: Request, res: Response, next: NextFunction) => {
 /**
  * Handle GET requests to retrieve the configuration for a specific user based on their UUID. The route expects a UUID parameter in the URL, which is used to identify the user whose configuration is being requested. The function calls the getUserConfig service with the provided UUID, retrieves the user's configuration, and responds with the appropriate status code and JSON data containing the configuration details or an error message if the retrieval fails.
  */
-usersRouter.get("/:uuid", (req: Request, res: Response) => {
+usersRouter.get("/:uuid", async (req: Request, res: Response) => {
     const uuid = req.params.uuid as string;
-    const getConfig = getUserConfig(uuid);
+    const getConfig = await getUserConfig(uuid);
 
     return res.sendServerJson(getConfig);
 });
