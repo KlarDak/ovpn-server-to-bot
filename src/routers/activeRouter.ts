@@ -37,12 +37,12 @@ activeRouter.get("/", async (_, res: Response) => {
 activeRouter.get("/list", async (_req: Request, res: Response) => {
   try {
     const clients = await getConnectedClients();
-    
+
     const serverStatus = {
       date: new Date().toISOString(),
       server_number: 1,
       server_code: subIndex(),
-      count: clients.length,
+      count: clients.length ?? 0,
       active_users: clients,
     };
 
