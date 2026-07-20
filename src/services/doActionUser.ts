@@ -44,7 +44,7 @@ function sendCommand(command: string): Promise<string> {
 export async function getConnectedClients() : Promise<IConnectedUser[]> {
   try {
     const dbFile = new SQLiteClient(pathDirs().userDB);
-    const activeUsersList = await dbFile.all("SELECT * FROM users WHERE status = 'active'");
+    const activeUsersList = await dbFile.all("SELECT uuid, user_type, realip, virtualip, connectedsince, bytes_received, bytes_sent FROM users WHERE status = 'active'");
 
     return activeUsersList as IConnectedUser[];
   }
