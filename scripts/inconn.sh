@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 
 set -a
 source "$(dirname "$0")/../.env.server"
@@ -9,7 +9,6 @@ UUID="${common_name:-}"
 if ! [[ "$UUID" =~ ^[a-fA-F0-9-]{36}$ ]]; then
     exit 1
 fi
-
 
 handle_connection() {
   DBUSER=$(sqlite3 -separator '|' "$DB_SERVER" "SELECT COALESCE(user_type, 'user'), COALESCE(status, 'unknown') FROM users WHERE uuid = '$UUID'")
@@ -47,7 +46,7 @@ handle_connection() {
         WHERE uuid='$UUID';
 
         SELECT changes();
-    ")
+    " 2>&1)
 
 
   if [ "$UPDATED" -eq 1 ]; then
