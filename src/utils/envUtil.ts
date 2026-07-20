@@ -95,6 +95,3 @@ export function vpnManagementPaths(): any {
  * Return feedback webhook URL from environment variable
  * @returns string - feedback webhook URL
  */
-export function feedbackWebhookUrl(): string {
-  return process.env.FEEDBACK_WEBHOOK_URL ?? "https://example.com/webhook";
-}

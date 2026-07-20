@@ -102,8 +102,6 @@ if [ "$ACTION" = "revoke" ]; then
     rm "$OUT";
     cd "${OVPN_SERVER}/easy-rsa/";
 
-    IS_BANNED=$(sqlite3 "$DB_SERVER" "SELECT status FROM users WHERE uuid = '$USER' LIMIT 1;");
-
     ./easyrsa --batch revoke $USER
     ./easyrsa gen-crl
     cp -f pki/crl.pem "$OVPN_SERVER"

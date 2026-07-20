@@ -11,7 +11,7 @@ if ! [[ "$UUID" =~ ^[a-fA-F0-9-]{36}$ ]]; then
 fi
 
 handle_connection() {
-  DBUSER=$(sqlite3 -separator '|' "$DB_SERVER" "SELECT COALESCE(user_type, 'user'), COALESCE(status, 'unknown') FROM users WHERE uuid = '$UUID'")
+  DBUSER=$(sqlite3 -separator '|' "$USERDB_DIR/userdb.db" "SELECT COALESCE(user_type, 'user'), COALESCE(status, 'unknown') FROM users WHERE uuid = '$UUID'")
 
   if [ -z "$DBUSER" ]; then
     exit 1;
@@ -36,7 +36,7 @@ handle_connection() {
       exit 4;
   fi
 
-  UPDATED=$(sqlite3 "$DB_SERVER" "
+  UPDATED=$(sqlite3 "$USERDB_DIR/userdb.db" "
         UPDATE users
         SET
             status='active',
@@ -57,7 +57,7 @@ handle_connection() {
 }
 
 handle_disconnection() {
-  UPDATED=$(sqlite3 "$DB_SERVER" "UPDATE users SET status='inactive', realip=null, virtualip=null, connectedsince=null, bytes_received=bytes_received + '$bytes_received', bytes_sent=bytes_sent + '$bytes_sent' WHERE uuid='$UUID'; SELECT changes();")
+  UPDATED=$(sqlite3 "$USERDB_DIR/userdb.db" "UPDATE users SET status='inactive', realip=null, virtualip=null, connectedsince=null, bytes_received=bytes_received + '$bytes_received', bytes_sent=bytes_sent + '$bytes_sent' WHERE uuid='$UUID'; SELECT changes();")
 
   if [ "$UPDATED" -eq 1 ]; then
     exit 0
