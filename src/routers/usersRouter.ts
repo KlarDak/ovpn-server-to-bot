@@ -54,7 +54,7 @@ usersRouter.patch("/:uuid", async (req: Request, res: Response) => {
     const { type, time } = req.body;
     const uuid = req.params.uuid as string;
     
-    const patchConfig = await patchUserConfig(uuid, type, time);
+    const patchConfig = await patchUserConfig(uuid, time, type);
 
     return res.sendServerJson(patchConfig);
 });

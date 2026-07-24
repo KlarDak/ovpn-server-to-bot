@@ -16,7 +16,13 @@ export function verifyUuidFormat(uuid: string): boolean {
  * @returns boolean - true if the input object contains the required keys and can be cast to ITokenConfig, false otherwise
  */
 export function verifyPayloadKeys(payload: any): boolean {
-    return payload as ITokenConfig ? true : false;
+    if (!payload || typeof payload !== "object") {
+        return false;
+    }
+
+    const requiredFields: Array<keyof ITokenConfig> = ["sub", "aud", "iat", "exp", "role"];
+    return requiredFields.every((field) => field in payload)
+      && ["admin", "bot", "site", "user"].includes(payload.role);
 }
 
 /**
@@ -26,6 +32,9 @@ export function verifyPayloadKeys(payload: any): boolean {
  * @returns boolean - true if the input object contains all the required fields specified in the requiredFields array, false otherwise
  */
 export function verifyRequiredFields(obj: any, requiredFields: string[]): boolean {
+    if (!obj || typeof obj !== "object") {
+        return false;
+    }
     for (const field of requiredFields) {
         if (!(field in obj)) {
             return false;

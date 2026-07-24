@@ -6,7 +6,7 @@ import type { IConnectedUser } from "../interfaces/IConnectedUser.js";
 /**
  * This module provides functions to interact with the OpenVPN management interface, allowing you to retrieve information about connected clients and kick users based on their UUID. The sendCommand function establishes a TCP connection to the management interface, sends a command, and returns the response as a string. The getConnectedClients function retrieves the list of currently connected clients and their details, while the kickUser function allows you to disconnect a user by sending a kill command with their UUID.
  */
-const HOST = vpnManagementPaths().host;
+const HOST = vpnManagementPaths().hostname;
 const PORT = vpnManagementPaths().port;
 
 /**

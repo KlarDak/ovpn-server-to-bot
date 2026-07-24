@@ -2,7 +2,7 @@
 pja-package.json
 .env
 .env.server
-tests/
+coverage/
 UTILITIES.md
 middlewares/
 userdir/

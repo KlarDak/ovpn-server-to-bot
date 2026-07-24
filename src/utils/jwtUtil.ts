@@ -49,7 +49,7 @@ export function decodeToken(token: string): any {
  */
 export function encodeToken(sub: string, role: string): string | false {
     try {
-        const token = jsonwebtoken.sign(payloadGenerator(sub, role), keyStats(), { expiresIn: "12s" });
+        const token = jsonwebtoken.sign(payloadGenerator(sub, role), keyStats());
         return token;
     }
     catch (error) {
@@ -65,11 +65,12 @@ export function encodeToken(sub: string, role: string): string | false {
  * @returns object - payload for the JWT token
  */
 export function payloadGenerator(sub: string, role: string): ITokenConfig {
+    const now = Math.floor(Date.now() / 1000);
     return {
       sub: sub,
       aud: subIndex(),
-      iat: Date.now(),
-      exp: Date.now() + 12000,
+      iat: now,
+      exp: now + 12,
       role: role as "admin" | "bot" | "site" | "user",
     };
 }
@@ -80,7 +81,12 @@ export function payloadGenerator(sub: string, role: string): ITokenConfig {
  * @returns string | false - JWT token if successful, false otherwise
  */
 export function getAuthToken(auth_header: string) : string | false {
-    return auth_header.replace("Bearer ", "") ?? false;
+    if (typeof auth_header !== "string" || !auth_header.startsWith("Bearer ")) {
+      return false;
+    }
+
+    const token = auth_header.slice("Bearer ".length).trim();
+    return token || false;
 }
 
 export function getAuthParams(): any {}

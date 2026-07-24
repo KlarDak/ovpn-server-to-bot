@@ -36,7 +36,7 @@ export async function postUserConfig(uuid: string, type: string, time: number): 
         return responseGenerator(409, "CONFIG_FILE_ALREADY_EXISTS");
     }
 
-    const uuidFileCreated = createFile(uuid);
+    const uuidFileCreated = await createFile(uuid);
 
     if (!uuidFileCreated) {
         return responseGenerator(500, "CONFIG_FILE_CREATION_FAILED");
@@ -72,7 +72,7 @@ export async function putUserConfig(uuid: string, type: string, time: number): P
       return responseGenerator(400, "UPDATE_FIELDS_MISSING");
     }
     
-    const uuidFileCreated = updateFile(uuid);
+    const uuidFileCreated = await updateFile(uuid);
 
     if (!uuidFileCreated) {
         return responseGenerator(500, "CONFIG_FILE_UPDATE_FAILED")

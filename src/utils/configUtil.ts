@@ -65,7 +65,7 @@ class configFiles {
    */
   static async update(uuid: string, argsUpdate: IUpdateConfigUtil): Promise<boolean> {
     try {
-        if (Object.keys(argsUpdate).length === 0 || (argsUpdate.time && argsUpdate.time <= 0) || (argsUpdate.status && !["active", "inactive", "banned"].includes(argsUpdate.status as string))) {
+        if (Object.keys(argsUpdate).length === 0 || (argsUpdate.time !== undefined && argsUpdate.time <= 0) || (argsUpdate.status && !["active", "inactive", "banned"].includes(argsUpdate.status as string))) {
             return false;
         }
 
