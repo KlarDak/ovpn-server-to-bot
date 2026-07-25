@@ -65,13 +65,34 @@ class configFiles {
    */
   static async update(uuid: string, argsUpdate: IUpdateConfigUtil): Promise<boolean> {
     try {
-        if (Object.keys(argsUpdate).length === 0 || (argsUpdate.time !== undefined && argsUpdate.time <= 0) || (argsUpdate.status && !["active", "inactive", "banned"].includes(argsUpdate.status as string))) {
-            return false;
+        if (
+          Object.keys(argsUpdate).length === 0 ||
+          (argsUpdate.time !== undefined && argsUpdate.time <= 0) ||
+          (argsUpdate.status &&
+            !["active", "inactive", "banned"].includes(
+              argsUpdate.status as string,
+            ))
+        ) {
+          return false;
         }
+
+      const { time, ...fields } = argsUpdate;
+      const updateData = Object.fromEntries(
+        Object.entries({
+          ...fields,
+          ...(time !== undefined
+            ? {
+                expired_time: new Date(
+                  Date.now() + time * 1000,
+                ).toISOString(),
+              }
+            : {}),
+        }).filter(([_, value]) => value !== undefined),
+      );
 
       await this.userDB.update(
         "users",
-        Object.fromEntries(Object.entries(argsUpdate).filter(([_, value]) => value !== undefined)),
+        updateData,
         "WHERE uuid = ?",
         [uuid],
       );

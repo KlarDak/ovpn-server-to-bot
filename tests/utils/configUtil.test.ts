@@ -43,6 +43,18 @@ describe("configFiles", () => {
       "WHERE uuid = ?",
       ["uuid"],
     );
+
+    expect(await configFiles.update("uuid", { time: 60 })).toBe(true);
+    expect(db.update).toHaveBeenLastCalledWith(
+      "users",
+      {
+        expired_time: expect.stringMatching(
+          /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/,
+        ),
+      },
+      "WHERE uuid = ?",
+      ["uuid"],
+    );
   });
 
   test("deletes records and reports database availability", async () => {
