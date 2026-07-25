@@ -73,6 +73,8 @@ install_packages() {
         redis-server \
         redis-tools \
         sudo \
+        curl \
+        ca-certificates \
         sqlite3
 }
 

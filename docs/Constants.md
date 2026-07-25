@@ -95,6 +95,7 @@ NO_REDIS=
 |Имя константы|Тип данных|Описание|
 |:--:|:--:|:--:|
 |``OVPN_SERVER``|string|Путь до директории сервера OpenVPN|
+|``OVPN_PUBLIC_HOST``|string|Необязательный публичный IPv4-адрес или домен OpenVPN-сервера. Если не указан, определяется автоматически|
 |``SERVER``|string|Путь до директории сервера-обработчика API|
 |``CONFIGS_DIR``|string|Путь до директории хранения сгенерированных конфиг-файлов|
 |``USERDB_DIR``|string|Путь до директории хранения SQLite база данных|
@@ -110,6 +111,7 @@ NO_REDIS=
 
 ```text
 OVPN_SERVER=
+OVPN_PUBLIC_HOST=
 SERVER=
 CONFIGS_DIR=
 USERDB_DIR=
