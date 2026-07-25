@@ -1,5 +1,5 @@
 export interface IUpdateConfigUtil {
-    time?: number,
-    user_type?: string,
-    status?: string
+  expired_time?: number;
+  user_type?: string;
+  status?: string;
 }
