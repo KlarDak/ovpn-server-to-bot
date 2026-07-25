@@ -36,14 +36,12 @@ export async function createFile(uuid: string) : Promise<boolean> {
         return false;
     }
 
-    const newUser = await execFileAsync("sudo", [configPath(), "create", uuid]);
-
-    if (newUser.stderr) {
-        console.serverError("filesUtil", newUser.stderr);
-        return false;
-    }
-    else {
+    try {
+        await execFileAsync("sudo", [configPath(), "create", uuid]);
         return true;
+    } catch (error) {
+        console.serverError("filesUtil", error);
+        return false;
     }
 }
 
@@ -57,13 +55,12 @@ export async function updateFile(uuid: string): Promise<boolean> {
       return false;
     }
 
-    const newUser = await execFileAsync("sudo", [configPath(), "update", uuid]);
-
-    if (newUser.stderr) {
-      console.serverError("filesUtil", newUser.stderr);
-      return false;
-    } else {
+    try {
+      await execFileAsync("sudo", [configPath(), "update", uuid]);
       return true;
+    } catch (error) {
+      console.serverError("filesUtil", error);
+      return false;
     }
 }
 
@@ -77,12 +74,12 @@ export async function deleteFile(uuid: string): Promise<boolean> {
       return false;
     }
 
-    const newUser = await execFileAsync("sudo", [configPath(), "delete", uuid]);
-    if (newUser.stderr) {
-      console.serverError("filesUtil", newUser.stderr);
-      return false;
-    } else {
+    try {
+      await execFileAsync("sudo", [configPath(), "delete", uuid]);
       return true;
+    } catch (error) {
+      console.serverError("filesUtil", error);
+      return false;
     }
 }
  
