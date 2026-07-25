@@ -66,10 +66,10 @@ handle_disconnection() {
   fi
 }
 
-IS_EXISTS=$(sqlite3 "$USERDB_DIR/userdb.db" "SELECT COUNT(*) FROM users WHERE uuid = '$UUID');")
+IS_EXISTS=$(sqlite3 "$USERDB_DIR/userdb.db" "SELECT COUNT(*) FROM users WHERE uuid = '$UUID';")
 
 if [ "$IS_EXISTS" -eq 0 ]; then
-  sqlite3 "$USERDB_DIR/userdb.db" "INSERT INTO users (uuid, user_type, created_at, status) VALUES ('$UUID', 'user', '2024-10-25T02:00:00', '2099-12-31T23:59:59', 'inactive')"
+  sqlite3 "$USERDB_DIR/userdb.db" "INSERT INTO users (uuid, user_type, created_at, expired_time, status) VALUES ('$UUID', 'user', '2024-10-25T02:00:00', '2099-12-31T23:59:59', 'inactive')"
 fi
 
 case "$script_type" in
