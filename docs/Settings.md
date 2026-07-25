@@ -10,6 +10,8 @@
 
 > **Важно:** перед запуском скрипта, убедитесь, что файл ``.env.server`` заполнен верно (по шаблону файла ``.env.server.temp``).
 
+Подробное описание констант файла ``.env.server`` можете прочитать в [Constants.md](Constants.md#рабочие-константы-системы-генерации-конфиг-файлов-и-проверки-соединений).
+
 **Порядок настройки:**
 
 1. Перейдите в директорию ``scripts/``.
@@ -26,8 +28,8 @@ sudo ./dbinstaller.sh
 
 ```text
 script-security 2
-client-connect [абсолютное местоположение директории]/scripts/inconn.sh
-client-disconnect [абсолютное местоположение директории]/scripts/inconn.sh
+client-connect /absolute/path/scripts/inconn.sh
+client-disconnect /absolute/path/scripts/inconn.sh
 ```
 6. После внесения, перезапустите сервер OpenVPN.
 
