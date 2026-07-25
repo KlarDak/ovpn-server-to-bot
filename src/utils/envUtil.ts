@@ -1,6 +1,23 @@
 import dotenv from "dotenv";
 dotenv.config();
 
+function parseBooleanEnv(value: string | undefined, fallback = false): boolean {
+  if (value === undefined || value.trim() === "") {
+    return fallback;
+  }
+
+  switch (value.trim().toLowerCase()) {
+    case "true":
+    case "1":
+      return true;
+    case "false":
+    case "0":
+      return false;
+    default:
+      throw new Error(`Invalid boolean environment value: "${value}"`);
+  }
+}
+
 /**
  * Get server properties from environment variables
  * @returns object - server properties
@@ -92,9 +109,17 @@ export function vpnManagementPaths(): any {
 }
 
 /**
- * Return feedback webhook URL from environment variable
- * @returns string - feedback webhook URL
+ * Return info about working server with sqlite server
+ * @returns boolean - is SQLite database active in this server
  */
-export function feedbackWebhookUrl(): string {
-  return process.env.FEEDBACK_WEBHOOK_URL ?? "https://example.com/webhook";
+export function noSQLiteMode(): boolean {
+  return parseBooleanEnv(process.env.NO_SQL);
+}
+
+/**
+ * Return info about working server with redis server
+ * @returns boolean - is redis active in this server
+ */
+export function noRedisMode(): boolean {
+  return parseBooleanEnv(process.env.NO_REDIS);
 }

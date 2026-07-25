@@ -24,11 +24,41 @@ GET /api/config/:uuid
 
 ```json
 {
-    "code": 404,    
-    "data": null,    
-    "message": "Configuration file not found"
+    "code": 200,    
+    "data": {
+        "id": 15,
+        "uuid": "def38fa8-baaa-43a7-ab1b-c43100d21127",
+        "user_type": "user",
+        "created_at": "2026-07-16T23:08:08.827Z",
+        "expired_time": "2026-07-17T01:54:48.827Z",
+        "status": "active",
+        "realip": "192.168.1.75",
+        "virtualip": "10.8.0.14",
+        "connectedsince": "2026-07-21 01:06:02",
+        "bytes_received": 2462042,
+        "bytes_sent": 4813620
+    },    
+    "message": "USER_CONFIG_RETRIEVED"
 }
 ```
+
+#### Описание полей ответа
+
+Ниже представлено описание полей, передаваемые в ключе ``data``:
+
+|Поле|Описание|
+|:--:|:--|
+|id|ID конфиг-файла на сервере|
+|uuid|Уникальный идентификатор конфиг-файла|
+|user_type|Тип конфиг-файла|
+|created_at|Дата создания конфиг-файла|
+|expired_time|Дата истечения действия конфиг-файла|
+|status|Статус доступов конфиг-файла|
+|realip|Реальный IP-адрес пользователя (если активен)|
+|virtualip|IP-адрес пользователя внутри VPN (если активен)|
+|connectedsince|Дата и время подключения к VPN (если активен)|
+|bytes_received|Байт передано|
+|bytes_sent|Байт получено|
 
 ### Создание конфигурационного файла пользователя
 
@@ -53,7 +83,7 @@ POST /api/config
         "uuid": "430a8e06-d9b6-11f0-a8db-38f3ab6d0b91",
         "link": "6SM0Yj"
     },
-    "message": "User configuration created successfully"
+    "message": "USER_CONFIGURATION_CREATED"
 }
 ```
 
@@ -83,7 +113,7 @@ PUT /api/config/:uuid
         "uuid": "430a8e06-d9b6-11f0-a8db-38f3ab6d0b72",
         "link": "FD7DaT"
     },
-    "message": "User configuration updated successfully"
+    "message": "USER_CONFIGURATION_UPDATED"
 }
 ```
 
@@ -112,7 +142,7 @@ PATCH /api/config/:uuid
     "data": {
         "uuid": "430a8e06-d9b6-11f0-a8db-38f3ab6d0b72"
     },
-    "message": "User configuration updated successfully"
+    "message": "USER_CONFIGURATION_UPDATED"
 }
 ```
 
@@ -134,7 +164,7 @@ DELETE /api/config/:uuid
     "data": {
         "uuid": "430a8e06-d9b6-11f0-a8db-38f3ab6d0b72"
     },
-    "message": "User configuration deleted successfully"
+    "message": "USER_CONFIGURATION_DELETED"
 }
 ```
 
@@ -167,7 +197,7 @@ GET /api/server/status
         "isConfigsDirExists": true,
         "isOVPNActive": true
     },
-    "message": "Set status of all server's functions"
+    "message": "SERVER_FUNCTIONS_STATUS_SET"
 }
 ```
 
@@ -219,7 +249,7 @@ GET /api/server/metrics
         },
         "uptime_seconds": 57176.24
     },
-    "message": "System metrics retrieved successfully"
+    "message": "METRICS_RETRIEVED"
 }
 ```
 
@@ -250,12 +280,12 @@ GET /api/active/list
 ```json
 {
     "code": 200,
-    "message": "List of active users retrieved successfully",
+    "message": "ACTIVE_USERS_RETRIEVED",
     "data": {
         "date": "2026-07-10T17:42:27.579Z",
         "server_number": 1,
         "server_code": "nln_ru_01",
-        "count": 1,
+        "count": 3,
         "active_users": [
             {
                 "uuid": "430a8e06-d9b6-11f0-a8db-38f3ab6d0b72",
@@ -265,6 +295,7 @@ GET /api/active/list
                 "bytesReceived": 102,
                 "bytesSent": 51
             }
+            ...
         ]
     }
 }
@@ -275,11 +306,11 @@ GET /api/active/list
 |Ключ|Значение|
 |:--:|--|
 |count|Количество подключённых пользователей|
-|realIp|Истинный IP-адрес пользователя конфиг-файла|
-|vurtialIp|IP-адрес пользователя конфиг-файла в системе|
-|connectedSince|DATETIME подключения конфиг-файла к серверу|
-|bytesReceived|Байт получено от сервера с момента подключения|
-|bytesSent|Байт отправлено сервером с момента подключения|
+|realip|Истинный IP-адрес пользователя конфиг-файла|
+|vurtialip|IP-адрес пользователя конфиг-файла в системе|
+|connectedsince|DATETIME подключения конфиг-файла к серверу|
+|bytes_received|Байт получено от сервера с момента подключения|
+|bytes_sent|Байт отправлено сервером с момента подключения|
 
 ### Отключение конфигурационного файла от сервера
 
@@ -296,7 +327,7 @@ POST /api/active/kick
 ```json
 {
     "code": 200,
-    "message": "User kicked successfully."
+    "message": "USER_KICKED"
 }
 ```
 
@@ -315,7 +346,7 @@ POST /api/active/ban
 ```json
 {
     "code": 200,
-    "message": "User banned successfully."
+    "message": "USER_BANNED"
 }
 ```
 
@@ -334,11 +365,15 @@ POST /api/active/pardon
 ```json
 {
     "code": 200,
-    "message": "User pardoned successfully."
+    "message": "USER_PARDONNED"
 }
 ```
 
 ## Скачивание сгенерированного конфигурационного файла пользователя
+
+С версии ``dev-2.1.3`` существуют два способа скачивания конфиг-файла. В обоих случаях возвращается ``.ovpn``-файл.
+
+### Скачивание с токеном авторизации
 
 Для скачивания сгенерированного конфигурационного файла пользователя используйте эндпоинт ``/api/download/`` с методом ``GET``.
 
@@ -348,8 +383,45 @@ GET /api/download/:shortlink
 
 где ``:shortlink`` - короткая ссылка, получаемая от запроса POST / PUT эндпоинта ``/api/users``.
 
-В качестве ответа возвращает содержимое ``.ovpn``-файла.
+### Скачивание без токена авторизации
+
+Для скачивания конфигурационного файла без токена авторизации, используйте эндпоинт ``/getConfig/`` с методом ``GET``.
+
+```http
+GET /getConfig/:shortlink
+```
+
+где ``:shortlink`` - короткая ссылка, получаемая от запроса POST / PUT эндпоинта ``/api/users``.
+
+## Ответы с ошибками
+
+В случае ошибок по эндпоинту ``/api/server`` в ``data`` передаются определённые ключи для ошибок.
+
+**Пример с ``message`` и ``raw``:**
+
+```json
+{
+    "code": 500,
+    "message": "ACTIVE_USERS_FETCH_FAILED",
+    "data": {
+      "message": "Информация об ошибке",
+      "raw": "Полные данные об ошибке",
+    }
+}
+```
+
+**Пример с ``info``:**
+
+```json
+{
+    "code": 500,
+    "message": "USER_KICK_FAILED",
+    "data": {
+      "info": "Полные данные об ошибке",
+    }
+}
+```
 
 ## Допустимые ответы и ошибки
 
-Список допустимых положительных ответов и ошибок с подробным описанием возможной причины указаны в файле [Exceptions.md](Exceptions.md).
+Список допустимых положительных ответов и ошибок с описанием возможной причины указаны в файле [Exceptions.md](Exceptions.md).

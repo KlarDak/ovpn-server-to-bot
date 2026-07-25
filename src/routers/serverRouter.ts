@@ -1,7 +1,6 @@
 import Router from 'express';
 import type { NextFunction, Request, Response } from 'express';
 import RedisUtil from '../utils/redisUtil.js';
-import { responseGenerator } from '../utils/resgenUtil.js';
 import { isDirExists } from '../utils/filesUtil.js';
 import { redisPaths } from '../utils/envUtil.js';
 import { configFiles } from '../utils/configUtil.js';
@@ -15,14 +14,7 @@ const serverRouter = Router();
  */
 serverRouter.use((req: Request, res: Response, next: NextFunction) => {
   if (!["admin"].includes((req as any).tokenPayload.role)) {
-    return res
-      .status(403)
-      .json(
-        responseGenerator(
-          403,
-          "Access denied: insufficient permissions. Change endpoint or use an admin token.",
-        ),
-      );
+    return res.sendServerJson(403, "INSUFFICIENT_PERMISSIONS");
   }
 
   return next();
@@ -31,18 +23,7 @@ serverRouter.use((req: Request, res: Response, next: NextFunction) => {
 /**
  * Handle GET requests to the "/status/" endpoint to check the status of various server functions. The route checks if the user has the appropriate "check" type in their token payload, and if so, it attempts to connect to a Redis server, checks for the existence of certain directories, and executes a command to check if the OpenVPN process is active. The results of these checks are compiled into a JSON response indicating the status of each function, along with a timestamp and server information. If any errors occur during the checks, it responds with a 500 status code and an error message.
  */
-serverRouter.get("/status/", async (req: Request, res: Response) => {
-  if ((req as any).tokenPayload.type !== "check") {
-    return res
-      .status(403)
-      .json(
-        responseGenerator(
-          403,
-          "Access denied: insufficient permissions. Change endpoint or use an admin token.",
-        ),
-      );
-  }
-
+serverRouter.get("/status/", async (_, res: Response) => {
   try {
     const redisConnect = new RedisUtil(
       redisPaths().hostname,
@@ -50,7 +31,6 @@ serverRouter.get("/status/", async (req: Request, res: Response) => {
     );
     await redisConnect.connect();
 
-    configFiles.createTable();
     const redisStatus: boolean =
       (await redisConnect.ping()) === "PONG" ? true : false;
     const configsDirExists: boolean = isDirExists();
@@ -58,24 +38,26 @@ serverRouter.get("/status/", async (req: Request, res: Response) => {
 
     return exec("pgrep openvpn", (error, stdout) => {
       const isOVPNActive = !error && stdout.trim() ? true : false;
+      const serverStatus = {
+        date: new Date().toISOString(),
+        server_number: 1,
+        server_code: "ksd_nl_01",
+        isServerWorking: true,
+        isRedisRunning: redisStatus,
+        isConfigsDirExists: configsDirExists,
+        isConfigsDBExists: configsDBExists,
+        isOVPNActive: isOVPNActive,
+      };
 
-      return res.status(200).json(
-        responseGenerator(200, "Set status of all server's functions", {
-          date: new Date().toISOString(),
-          server_number: 1,
-          server_code: "ksd_nl_01",
-          isServerWorking: true,
-          isRedisRunning: redisStatus,
-          isConfigsDirExists: configsDirExists,
-          isConfigsDBExists: configsDBExists,
-          isOVPNActive: isOVPNActive,
-        }),
+      return res.sendServerJson(
+        200,
+        "SERVER_FUNCTIONS_STATUS_SET",
+        serverStatus,
       );
     });
   } catch (error) {
-    return res
-      .status(500)
-      .json(responseGenerator(500, "Error to set something data", error));
+    console.serverError("serverRouter", error);
+    return res.sendServerJson(500, "SERVER_STATE_FETCH_FAILED", error);
   }
 });
 
@@ -98,7 +80,7 @@ serverRouter.get("/metrics", async (_req: Request, res: Response) => {
 
     const time = si.time();
     const mainDisk = disk.find((d) => d.mount === "/") || disk[0];
-    const data = {
+    const serverLoads = {
       timestamp: new Date().toISOString(),
       cpu: {
         usage_percent: Number(cpu.currentLoad.toFixed(2)),
@@ -136,15 +118,10 @@ serverRouter.get("/metrics", async (_req: Request, res: Response) => {
       uptime_seconds: time.uptime,
     };
 
-    res.json(
-      responseGenerator(200, "System metrics retrieved successfully", data),
-    );
+    res.sendServerJson(200, "METRICS_RETRIEVED", serverLoads);
   } catch (error) {
-    res.status(500).json(
-      responseGenerator(500, "Failed to retrieve system metrics", {
-        message: String(error),
-      }),
-    );
+    console.serverError("serverRouter", error);
+    res.sendServerJson(500, "SERVER_STATE_FETCH_FAILED", error);
   }
 });
 

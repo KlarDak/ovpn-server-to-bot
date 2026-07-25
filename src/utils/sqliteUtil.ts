@@ -12,7 +12,7 @@ class SQLiteClient {
      */
     constructor(dbFile: string) {
         this.db = new sqlite3.Database(dbFile, (err) => {
-            if (err) console.error("DB connect error:", err.message);
+            if (err) console.serverError("sqliteUtil", err.message);
         });
     } 
 

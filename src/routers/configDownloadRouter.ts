@@ -1,8 +1,8 @@
 import { Router } from "express";
 import type { Request, Response } from "express";
-import { responseGenerator } from "../utils/resgenUtil.js";
 import { decodeLink } from "../utils/slinkUtil.js";
 import { isFileExist, getFile } from "../utils/filesUtil.js";
+import { verifyShortLink } from "../utils/verifyUtil.js";
 
 const configDownloadRouter = Router();
 
@@ -11,28 +11,22 @@ const configDownloadRouter = Router();
  */
 configDownloadRouter.get("/:shortlink", async (req: Request, res: Response) => {
   if (!(req as any).tokenPayload.role.includes("site")) {
-    return res
-      .status(403)
-      .json(responseGenerator(403, "Check your role for this action."));
+    return res.sendServerJson(403, "INSUFFICIENT_PERMISSIONS");
   }
 
-  const sl = req.params.shortlink as string;
-  if (!/^[A-Za-z0-9]{6}$/.test(sl)) {
-    return res.status(400).json(responseGenerator(400, "Invalid link format"));
+  const shortlink = req.params.shortlink as string;
+  if (!verifyShortLink(shortlink)) {
+    return res.sendServerJson(400, "INVALID_LINK_FORMAT");
   }
 
-  const decodedSLink = await decodeLink(sl);
+  const decodedSLink = await decodeLink(shortlink);
 
   if (!decodedSLink) {
-    return res
-      .status(404)
-      .json(responseGenerator(404, "Link not found or expired"));
+    return res.sendServerJson(404, "LINK_EXPIRED_OR_NOT_FOUND");
   }
 
   if (!isFileExist(decodedSLink)) {
-    return res
-      .status(404)
-      .json(responseGenerator(404, "Configuration file not found"));
+    return res.sendServerJson(404, "CONFIG_FILE_NOT_FOUND");
   }
 
   return res.download(getFile(decodedSLink) as string, `${decodedSLink}.ovpn`);

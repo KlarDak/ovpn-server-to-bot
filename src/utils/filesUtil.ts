@@ -37,11 +37,11 @@ export async function createFile(uuid: string) : Promise<boolean> {
     }
 
     try {
-      await execFileAsync("sudo", [configPath(), "create", uuid]);
-      return true;
-    }
-    catch (error) {
-      return false;
+        await execFileAsync("sudo", [configPath(), "create", uuid]);
+        return true;
+    } catch (error) {
+        console.serverError("filesUtil", error);
+        return false;
     }
 }
 
@@ -58,8 +58,8 @@ export async function updateFile(uuid: string): Promise<boolean> {
     try {
       await execFileAsync("sudo", [configPath(), "update", uuid]);
       return true;
-    }
-    catch(error) {
+    } catch (error) {
+      console.serverError("filesUtil", error);
       return false;
     }
 }
@@ -75,10 +75,10 @@ export async function deleteFile(uuid: string): Promise<boolean> {
     }
 
     try {
-      await execFileAsync("sudo", [configPath(), "revoke", uuid]);
+      await execFileAsync("sudo", [configPath(), "delete", uuid]);
       return true;
-    }
-    catch (err) {
+    } catch (error) {
+      console.serverError("filesUtil", error);
       return false;
     }
 }

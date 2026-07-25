@@ -10,7 +10,7 @@
     "jsonwebtoken": "^9.0.3",
     "redis": "^5.10.0",
     "sqlite3": "^5.1.7",
-    "systeminformation": "^5.31.5",
+    "systeminformation": "^5.33.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "uuid": "^13.0.0"
@@ -24,13 +24,17 @@
     "start": "node ./dist/app.js",
     "build": "npx tsc",
     "dev": "tsx ./src/app.ts",
-    "test": "vitest"
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "author": "CNS",
   "license": "ISC",
   "devDependencies": {
     "@types/jest": "^30.0.0",
+    "@types/supertest": "^7.2.1",
+    "@vitest/coverage-v8": "^4.1.10",
     "jest": "^30.2.0",
+    "supertest": "^7.2.2",
     "ts-jest": "^29.4.6",
     "vitest": "^4.0.18"
   }

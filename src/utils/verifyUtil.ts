@@ -1,4 +1,4 @@
-import type { ITokenConfig } from "../interfaces/ITokenConfig.js";
+import type { ITokenConfig } from "../interfaces/ITokenAuth.js";
 
 /**
  * Verify if the given UUID string is in a valid format, which consists of 32 hexadecimal characters separated by hyphens in the pattern of 8-4-4-4-12. The function uses a regular expression to check if the input string matches the expected UUID format, and returns true if it does, or false if it does not.
@@ -16,7 +16,13 @@ export function verifyUuidFormat(uuid: string): boolean {
  * @returns boolean - true if the input object contains the required keys and can be cast to ITokenConfig, false otherwise
  */
 export function verifyPayloadKeys(payload: any): boolean {
-    return payload as ITokenConfig ? true : false;
+    if (!payload || typeof payload !== "object") {
+        return false;
+    }
+
+    const requiredFields: Array<keyof ITokenConfig> = ["sub", "aud", "iat", "exp", "role"];
+    return requiredFields.every((field) => field in payload)
+      && ["admin", "bot", "site", "user"].includes(payload.role);
 }
 
 /**
@@ -26,6 +32,9 @@ export function verifyPayloadKeys(payload: any): boolean {
  * @returns boolean - true if the input object contains all the required fields specified in the requiredFields array, false otherwise
  */
 export function verifyRequiredFields(obj: any, requiredFields: string[]): boolean {
+    if (!obj || typeof obj !== "object") {
+        return false;
+    }
     for (const field of requiredFields) {
         if (!(field in obj)) {
             return false;
@@ -33,4 +42,8 @@ export function verifyRequiredFields(obj: any, requiredFields: string[]): boolea
     }
 
     return true;
+}
+
+export function verifyShortLink(slink: string): boolean {
+    return /^[A-Za-z0-9]{6}$/.test(slink);
 }

@@ -1,28 +1,23 @@
-import type { IResponseConfig } from "../interfaces/IResponseConfig.js";
+import type { IResponseConfig } from "../interfaces/IResponseArray.js";
 import type { IUserConfig } from "../interfaces/IUserConfig.js";
 import { configFiles } from "../utils/configUtil.js";
 import { createFile, deleteFile, isFileExist, updateFile } from "../utils/filesUtil.js";
 import { responseGenerator } from "../utils/resgenUtil.js";
 import { encodeLink } from "../utils/slinkUtil.js";
-import { verifyUuidFormat } from "../utils/verifyUtil.js";
 
 /**
  * Retrieve the user configuration for the given UUID if it exists, and return a standardized response object containing the status code, message and user configuration data. The function first verifies if the input UUID is in a valid format using the verifyUuidFormat function. If the UUID format is invalid, it returns a response with a 400 status code and an appropriate error message. If the UUID format is valid but the corresponding configuration file does not exist, it returns a response with a 404 status code and an appropriate error message. If the configuration file exists, it retrieves the user parameters from the configFiles object and returns a response with a 200 status code, a success message, and the retrieved user configuration data.
  * @param uuid - unique identifier for the user configuration, which should be in a valid UUID format
  * @returns IResponseConfig - standardized response object containing the status code, message and user configuration data if retrieval is successful, or an appropriate error message if retrieval fails due to invalid UUID format or non-existent configuration file
  */
-export function getUserConfig(uuid: string): IResponseConfig {
-    if (!verifyUuidFormat(uuid)) {
-      return responseGenerator(400, "Invalid UUID format");
-    }
-
+export async function getUserConfig(uuid: string): Promise<IResponseConfig> {
     if (!isFileExist(uuid)) {
-      return responseGenerator(404, "Configuration file not found");
+      return responseGenerator(404, "CONFIG_FILE_NOT_FOUND");
     }
     
-    const userParams = configFiles.get(uuid) ?? ({} as IUserConfig);
+    const userParams = await configFiles.get(uuid) ?? ({} as IUserConfig);
 
-    return responseGenerator(200, "User configuration retrieved successfully", userParams);
+    return responseGenerator(200, "USER_CONFIG_RETRIEVED", userParams);
 }
 
 /**
@@ -33,35 +28,30 @@ export function getUserConfig(uuid: string): IResponseConfig {
  * @returns IResponseConfig - standardized response object containing the status code, message and relevant data if creation is successful, or an appropriate error message if creation fails due to missing required fields, invalid UUID format, or existing configuration file for the given UUID
  */
 export async function postUserConfig(uuid: string, type: string, time: number): Promise<IResponseConfig> {
-    if (!uuid && !type && !time) {
-        return responseGenerator(400, "Missing required fields: uuid, type, time");
-    }
-
-    if (!verifyUuidFormat(uuid)) {
-        return responseGenerator(400, "Invalid UUID format");
+    if (!type || !time) {
+        return responseGenerator(400, "MISSING_REQUIRED_FIELDS");
     }
 
     if (isFileExist(uuid)) {
-        return responseGenerator(409, "Configuration file already exists");
+        return responseGenerator(409, "CONFIG_FILE_ALREADY_EXISTS");
     }
 
-    const uuidFileCreated = createFile(uuid);
+    const uuidFileCreated = await createFile(uuid);
 
     if (!uuidFileCreated) {
-        return responseGenerator(500, "Failed to create configuration file");
+        return responseGenerator(500, "CONFIG_FILE_CREATION_FAILED");
     }
 
-    const userConfigCreated = configFiles.create(uuid, type, time);
+    const userConfigCreated = await configFiles.create(uuid, type, time);
 
     if (!userConfigCreated) {
-        return responseGenerator(500, "Failed to create user configuration");
+        return responseGenerator(500, "DATABASE_RECORD_CREATION_FAILED");
     }
 
-    const slink = await encodeLink(uuid, time);
-    return responseGenerator(200, "User configuration created successfully", 
+    return responseGenerator(200, "USER_CONFIGURATION_CREATED", 
         {
             "uuid": uuid,
-            "link": slink
+            "link": await encodeLink(uuid, time)
         }
     );
 }
@@ -74,27 +64,27 @@ export async function postUserConfig(uuid: string, type: string, time: number): 
  * @return IResponseConfig - standardized response object containing the status code, message and relevant data if update is successful, or an appropriate error message if update fails due to missing fields for update, invalid UUID format, or non-existent configuration file for the given UUID
 */
 export async function putUserConfig(uuid: string, type: string, time: number): Promise<IResponseConfig> {
-    if (!verifyUuidFormat(uuid)) {
-        return responseGenerator(400, "Invalid UUID format")
+    if (!isFileExist(uuid)) {
+        return responseGenerator(409, "CONFIG_FILE_NOT_FOUND");
     }
 
-    if (!isFileExist(uuid)) {
-        return responseGenerator(409, "Configuration file is not exists")
+    if (!type || !time) {
+      return responseGenerator(400, "UPDATE_FIELDS_MISSING");
     }
     
-    const uuidFileCreated = updateFile(uuid);
+    const uuidFileCreated = await updateFile(uuid);
 
     if (!uuidFileCreated) {
-        return responseGenerator(500, "Failed to update configuration file")
+        return responseGenerator(500, "CONFIG_FILE_UPDATE_FAILED")
     }
 
-    const updatedUserConfig = configFiles.update(uuid, time, type);
+    const updatedUserConfig = await configFiles.update(uuid, {user_type: type as string, time: time as number});
 
     if (!updatedUserConfig) {
-        return responseGenerator(500, "Failed to update user configuration")
+        return responseGenerator(500, "DATABASE_RECORD_UPDATE_FAILED")
     }
 
-    return responseGenerator(200, "User configuration updated successfully", {
+    return responseGenerator(200, "USER_CONFIGURATION_UPDATED", {
         "uuid": uuid,
         "link": await encodeLink(uuid, time)
     });
@@ -109,24 +99,20 @@ export async function putUserConfig(uuid: string, type: string, time: number): P
  */
 export async function patchUserConfig(uuid: string, time?: number, type?: string): Promise<IResponseConfig> {
     if (!type && !time) {
-        return responseGenerator(400, "At least one field (type or time) must be provided for update");
-    }
-    
-    if (!verifyUuidFormat(uuid)) {
-      return responseGenerator(400, "Invalid UUID format");
+        return responseGenerator(400, "UPDATE_FIELDS_MISSING");
     }
 
     if (!isFileExist(uuid)) {
-      return responseGenerator(409, "Configuration file is not exists");
+      return responseGenerator(409, "CONFIG_FILE_NOT_FOUND");
     }
 
-    const updatedUserConfig = configFiles.update(uuid, time, type);
+    const updatedUserConfig = await configFiles.update(uuid, {user_type: type as string, time: time as number});
 
     if (!updatedUserConfig) {
-      return responseGenerator(500, "Failed to update user configuration");
+      return responseGenerator(500, "DATABASE_RECORD_UPDATE_FAILED");
     }
 
-    return responseGenerator(200, "User configuration updated successfully", {
+    return responseGenerator(200, "USER_CONFIGURATION_UPDATED", {
       uuid: uuid
     });
 }
@@ -137,23 +123,19 @@ export async function patchUserConfig(uuid: string, time?: number, type?: string
  * @returns IResponseConfig - standardized response object containing the status code, message and relevant data if deletion is successful, or an appropriate error message if deletion fails due to invalid UUID format or non-existent configuration file for the given UUID
  */
 export async function deleteUserConfig(uuid: string): Promise<IResponseConfig> {
-    if (!verifyUuidFormat(uuid)) {
-        return responseGenerator(400, "Invalid UUID format")
-    }
-
     const uuidFile = await deleteFile(uuid);
 
     if (!uuidFile) {
-        return responseGenerator(500, "Failed to delete configuration file")
+        return responseGenerator(500, "USER_CONFIGURATION_DELETE_FAILED")
     }
 
     const deleteUserConfig = await configFiles.delete(uuid);
 
     if (!deleteUserConfig) {
-        return responseGenerator(500, "Failed to delete user configuration")
+        return responseGenerator(500, "DATABASE_RECORD_DELETE_FAILED")
     }
 
-    return responseGenerator(200, "User configuration deleted successfully", {
+    return responseGenerator(200, "USER_CONFIGURATION_DELETED", {
         uuid: uuid
     });
 }
