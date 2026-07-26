@@ -19,7 +19,7 @@ class configFiles {
       user_type: type,
       created_at: new Date().toISOString(),
       expired_time: new Date(Date.now() + time * 1000).toISOString(),
-      status: "active",
+      status: "inactive",
     });
 
     return true;
