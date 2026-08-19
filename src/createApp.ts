@@ -7,6 +7,7 @@ import configDownloadRouter from "./routers/configDownloadRouter.js";
 import activeRouter from "./routers/activeRouter.js";
 import serverRouter from "./routers/serverRouter.js";
 import getConfigRouter from "./routers/getConfigRouter.js";
+import configsRouter from "./routers/configsRouter.js";
 import "./extensions/responseGenerator.js";
 
 export function createApp() {
@@ -50,6 +51,7 @@ export function createApp() {
   app.use("/api/config", usersRouter);
   app.use("/api/server", serverRouter);
   app.use("/api/active", activeRouter);
+  app.use("/api/configs", configsRouter);
 
   app.get("/", (_req, res) => {
     res.send("Welcome to the secure server! Use the API endpoints to interact with the server.");

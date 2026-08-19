@@ -2,6 +2,7 @@ import type { IUserConfig } from "../interfaces/IUserConfig.js";
 import type { IUpdateConfigUtil } from "../interfaces/IUpdateConfigUtil.js";
 import { pathDirs } from "./envUtil.js";
 import SQLiteClient from "./sqliteUtil.js";
+import { verifyUuidFormat } from "./verifyUtil.js";
 
 class configFiles {
   static userDB: SQLiteClient = new SQLiteClient(pathDirs().userDB);
@@ -112,6 +113,62 @@ class configFiles {
   static async delete(uuid: string): Promise<boolean> {
     try {
       await this.userDB.delete("users", "WHERE uuid = ?", [uuid]);
+
+      return true;
+    } catch (error) {
+      console.serverError("configUtil", error);
+      return false;
+    }
+  }
+
+  static async updateAll(argsUpdate: IUpdateConfigUtil, uuids: Array<string>): Promise<boolean> {
+    try {
+      if (
+          Object.keys(argsUpdate).length === 0 ||
+          (argsUpdate.time !== undefined && argsUpdate.time <= 0) ||
+          (argsUpdate.status &&
+            !["active", "inactive", "banned"].includes(
+              argsUpdate.status as string,
+            ))
+        ) {
+          return false;
+        }
+
+      const { time, ...fields } = argsUpdate;
+      const updateData = Object.fromEntries(
+        Object.entries({
+          ...fields,
+          ...(time !== undefined
+            ? {
+                expired_time: new Date(
+                  Date.now() + time * 1000,
+                ).toISOString(),
+              }
+            : {}),
+        }).filter(([_, value]) => value !== undefined),
+      );
+
+      const validUuids = uuids.filter((uuid) => verifyUuidFormat(uuid) !== false);
+      const uuidsPlaceholders = uuids.map(() => "?").join(", ");
+
+      await this.userDB.update(
+        "users",
+        updateData,
+        `WHERE uuid IN (${uuidsPlaceholders})`,
+        validUuids,
+      );
+
+      return true;
+    }
+    catch (error) {
+      console.serverError("configUtil", error);
+      return false;
+    }
+  }
+
+  static async deleteAll(uuids: Array<string>) : Promise<boolean> {
+    try {
+      await this.userDB.delete("users", "WHERE uuid IN (?)", uuids);
 
       return true;
     } catch (error) {

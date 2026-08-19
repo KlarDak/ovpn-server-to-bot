@@ -34,7 +34,7 @@ activeRouter.get("/", async (_, res: Response) => {
 /**
  * Handle GET requests to the "/list" endpoint to retrieve a list of currently connected clients. The route calls the getConnectedClients service function to fetch the list of active users, and then responds with a JSON object containing the current date, server information, the count of active users, and an array of active user details. If any errors occur during the retrieval of active users, it responds with a 500 status code and an error message indicating the failure to get active users.
  */
-activeRouter.get("/list", async (_req: Request, res: Response) => {
+activeRouter.get("/list", async (_, res: Response) => {
   try {
     const clients = await getConnectedClients();
 
