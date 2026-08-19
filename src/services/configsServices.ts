@@ -29,7 +29,7 @@ export async function getUserConfig(uuid: string): Promise<IResponseConfig> {
  */
 export async function postUserConfig(uuid: string, type: string, time: number): Promise<IResponseConfig> {
     if (!type || !time) {
-        return responseGenerator(400, "MISSING_REQUIRED_FIELDS");
+        return responseGenerator(422, "MISSING_REQUIRED_FIELDS");
     }
 
     if (isFileExist(uuid)) {
@@ -48,7 +48,7 @@ export async function postUserConfig(uuid: string, type: string, time: number): 
         return responseGenerator(500, "DATABASE_RECORD_CREATION_FAILED");
     }
 
-    return responseGenerator(200, "USER_CONFIGURATION_CREATED", 
+    return responseGenerator(201, "USER_CONFIGURATION_CREATED", 
         {
             "uuid": uuid,
             "link": await encodeLink(uuid, time)
@@ -65,11 +65,11 @@ export async function postUserConfig(uuid: string, type: string, time: number): 
 */
 export async function putUserConfig(uuid: string, type: string, time: number): Promise<IResponseConfig> {
     if (!isFileExist(uuid)) {
-        return responseGenerator(409, "CONFIG_FILE_NOT_FOUND");
+        return responseGenerator(404, "CONFIG_FILE_NOT_FOUND");
     }
 
     if (!type || !time) {
-      return responseGenerator(400, "UPDATE_FIELDS_MISSING");
+      return responseGenerator(422, "UPDATE_FIELDS_MISSING");
     }
     
     const uuidFileCreated = await updateFile(uuid);
@@ -102,11 +102,11 @@ export async function putUserConfig(uuid: string, type: string, time: number): P
  */
 export async function patchUserConfig(uuid: string, time?: number, type?: string): Promise<IResponseConfig> {
     if (!type && !time) {
-        return responseGenerator(400, "UPDATE_FIELDS_MISSING");
+        return responseGenerator(422, "UPDATE_FIELDS_MISSING");
     }
 
     if (!isFileExist(uuid)) {
-      return responseGenerator(409, "CONFIG_FILE_NOT_FOUND");
+      return responseGenerator(404, "CONFIG_FILE_NOT_FOUND");
     }
 
     const updatedUserConfig = await configFiles.update(uuid, {
@@ -141,7 +141,7 @@ export async function deleteUserConfig(uuid: string): Promise<IResponseConfig> {
         return responseGenerator(500, "DATABASE_RECORD_DELETE_FAILED")
     }
 
-    return responseGenerator(200, "USER_CONFIGURATION_DELETED", {
+    return responseGenerator(204, "USER_CONFIGURATION_DELETED", {
         uuid: uuid
     });
 }

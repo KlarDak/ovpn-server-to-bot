@@ -26,15 +26,15 @@
 |HTTP-код|Текстовой код|Описание ответа|
 |:--:|:--|:--|
 |200|``USER_CONFIG_RETRIEVED``|Информация о конфиг-файле сгенерирована|
-|200|``USER_CONFIGURATION_CREATED``|Конфиг-файл сгенерирован|
+|201|``USER_CONFIGURATION_CREATED``|Конфиг-файл сгенерирован|
 |200|``USER_CONFIGURATION_UPDATED``|Конфиг-файл обновлён|
-|200|``USER_CONFIGURATION_DELETED``|Конфиг-файл и его мета-данные удалены|
+|204|``USER_CONFIGURATION_DELETED``|Конфиг-файл и его мета-данные удалены|
 |200|``SERVER_FUNCTIONS_STATUS_SET``|Информация о состоянии функций сервера|
 |200|``METRICS_RETRIEVED``|Данные о физической нагрузке на сервере|
 |200|``ACTIVE_USERS_RETRIEVED``|Данные о подключённых к серверу пользователях|
-|200|``USER_KICKED``|Пользователь отключён|
-|200|``USER_BANNED``|Пользователь заблокирован|
-|200|``USER_PARDONNED``|Пользователь разблокирован|
+|204|``USER_KICKED``|Пользователь отключён|
+|204|``USER_BANNED``|Пользователь заблокирован|
+|201|``USER_PARDONNED``|Пользователь разблокирован|
 |200|``Active users endpoint is working``|_Корневой адрес active-endpoint_
 |-|``Welcome to the secure server! Use the API endpoints to interact with the server.``|_Корневой адрес_|
 
@@ -47,7 +47,6 @@
 |400|``REQUEST_BODY_MISSING``|Не найдено тело запроса|
 |400|``INVALID_LINK_FORMAT``|Неверный формат ссылки для скачивания конфиг-файла|
 |400|``INVALID_UUID``|Неверный форма UUID-идентификатора|
-|400|``UPDATE_FIELDS_MISSING``|Пропущены поля для обновления конфиг-файлов|
 |400|``MISSING_REQUIRED_FIELDS``|Пропущены обязательные параметры для запроса|
 |401|``INVALID_TOKEN_FORMAT``|Неверный формат токена авторизации|
 |403|``AUTH_HEADER_MISSING``|Не найден токен авторизации|
@@ -58,6 +57,7 @@
 |404|``CONFIG_FILE_NOT_FOUND``|Конфиг-файл не найден|
 |405|``METHOD_NOT_ALLOWED``|HTTP-метод недопустим для запросов|
 |409|``CONFIG_FILE_ALREADY_EXISTS``|Ошибка создания конфиг-файла: уже существует|
+|422|``UPDATE_FIELDS_MISSING``|Пропущены поля для обновления конфиг-файлов|
 |500|``ACTIVE_USERS_FETCH_FAILED``|Ошибка с получением информации о подключённых пользователях|
 |500|``USER_KICK_FAILED``|Ошибка отключения пользователя от сервера|
 |500|``USER_BAN_FAILED``|Ошибка блокировки пользователя на сервере|
