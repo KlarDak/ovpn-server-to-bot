@@ -2,6 +2,7 @@ import Router from 'express';
 import type { NextFunction, Request, Response } from 'express';
 import { verifyUuidFormat } from '../utils/verifyUtil.js';
 import { configFiles } from '../utils/configUtil.js';
+import { kickUser } from '../services/doActionUser.js';
 
 const configsRouter = Router();
 
@@ -46,6 +47,13 @@ configsRouter.patch("/", async (req: Request, res: Response) => {
         }, validUuids);
 
         if (updateConfigs) {
+            // TODO: Придумать, как это обыграть
+            if (type === "banned") {
+                for (const uuid in uuids) {
+                  await kickUser(uuid);
+                }
+            }
+
             return res.sendServerJson(201, "UUIDS_CONFIGURATION_UPDATED");
         }
         else {
@@ -81,5 +89,12 @@ configsRouter.delete("/", async (req: Request, res: Response) => {
         return res.sendServerJson(500, "DATABASE_RECORD_UPDATE_FAILED");
     }
 });
+
+configsRouter.patch("/kick");
+configsRouter.patch("/ban");
+configsRouter.patch("/pardon");
+
+configsRouter.patch("/update");
+
 
 export default configsRouter;

@@ -57,7 +57,7 @@ handle_connection() {
 }
 
 handle_disconnection() {
-  UPDATED=$(sqlite3 "$USERDB_DIR/userdb.db" "UPDATE users SET status='inactive', realip=null, virtualip=null, connectedsince=null, bytes_received=bytes_received + '$bytes_received', bytes_sent=bytes_sent + '$bytes_sent' WHERE uuid='$UUID'; SELECT changes();")
+  UPDATED=$(sqlite3 "$USERDB_DIR/userdb.db" "UPDATE users SET status='inactive', realip=null, virtualip=null, connectedsince=null, bytes_received=bytes_received + '$bytes_received', bytes_sent=bytes_sent + '$bytes_sent' WHERE uuid='$UUID' AND status='active'; SELECT changes();")
 
   if [ "$UPDATED" -eq 1 ]; then
     exit 0
