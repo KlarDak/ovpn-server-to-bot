@@ -66,4 +66,40 @@ describe("configFiles", () => {
     db.get.mockRejectedValue(new Error("offline"));
     await expect(configFiles.isExists()).resolves.toBe(false);
   });
+
+  test("updates multiple valid UUIDs with matching placeholders", async () => {
+    const firstUuid = "41649438-8844-11f1-9c27-4f9a5cf82333";
+    const secondUuid = "ce904c28-8829-11f1-8e46-57fb1ef7df93";
+    db.update.mockResolvedValue({ changes: 2 });
+
+    await expect(
+      configFiles.updateAll(
+        { status: "banned" },
+        [firstUuid, "invalid", secondUuid],
+      ),
+    ).resolves.toBe(true);
+
+    expect(db.update).toHaveBeenCalledWith(
+      "users",
+      { status: "banned" },
+      "WHERE uuid IN (?, ?)",
+      [firstUuid, secondUuid],
+    );
+  });
+
+  test("deletes multiple valid UUIDs with one placeholder per UUID", async () => {
+    const firstUuid = "41649438-8844-11f1-9c27-4f9a5cf82333";
+    const secondUuid = "ce904c28-8829-11f1-8e46-57fb1ef7df93";
+    db.delete.mockResolvedValue({ changes: 2 });
+
+    await expect(
+      configFiles.deleteAll([firstUuid, secondUuid]),
+    ).resolves.toBe(true);
+
+    expect(db.delete).toHaveBeenCalledWith(
+      "users",
+      "WHERE uuid IN (?, ?)",
+      [firstUuid, secondUuid],
+    );
+  });
 });

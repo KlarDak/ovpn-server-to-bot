@@ -141,7 +141,7 @@ export async function deleteUserConfig(uuid: string): Promise<IResponseConfig> {
         return responseGenerator(500, "DATABASE_RECORD_DELETE_FAILED")
     }
 
-    return responseGenerator(204, "USER_CONFIGURATION_DELETED", {
+    return responseGenerator(200, "USER_CONFIGURATION_DELETED", {
         uuid: uuid
     });
 }

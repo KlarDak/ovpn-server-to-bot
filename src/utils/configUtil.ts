@@ -149,7 +149,11 @@ class configFiles {
       );
 
       const validUuids = uuids.filter((uuid) => verifyUuidFormat(uuid) !== false);
-      const uuidsPlaceholders = uuids.map(() => "?").join(", ");
+      if (validUuids.length === 0) {
+        return false;
+      }
+
+      const uuidsPlaceholders = validUuids.map(() => "?").join(", ");
 
       await this.userDB.update(
         "users",
@@ -168,7 +172,17 @@ class configFiles {
 
   static async deleteAll(uuids: Array<string>) : Promise<boolean> {
     try {
-      await this.userDB.delete("users", "WHERE uuid IN (?)", uuids);
+      const validUuids = uuids.filter((uuid) => verifyUuidFormat(uuid) !== false);
+      if (validUuids.length === 0) {
+        return false;
+      }
+
+      const placeholders = validUuids.map(() => "?").join(", ");
+      await this.userDB.delete(
+        "users",
+        `WHERE uuid IN (${placeholders})`,
+        validUuids,
+      );
 
       return true;
     } catch (error) {

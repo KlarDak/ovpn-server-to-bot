@@ -29,11 +29,11 @@ configsRouter.post("/kick", async (req: Request, res: Response) => {
       const deleteConfigs = await configFiles.updateAll({"status": "inactive"}, validUuids);
 
       if (deleteConfigs) {
-        for (const uuid in uuids) {
+        for (const uuid of validUuids) {
           await kickUser(uuid);
         }
 
-        return res.sendServerJson(204, "UUIDS_CONFIGURATION_KICKED");
+        return res.sendServerJson(200, "UUIDS_CONFIGURATION_KICKED");
       } else {
         return res.sendServerJson(500, "DATABASE_RECORD_UPDATE_FAILED");
       }
@@ -60,11 +60,11 @@ configsRouter.post("/ban", async (req: Request, res: Response) => {
       );
 
       if (deleteConfigs) {
-        for (const uuid in uuids) {
+        for (const uuid of validUuids) {
           await kickUser(uuid);
         }
 
-        return res.sendServerJson(204, "UUIDS_CONFIGURATION_BANNED");
+        return res.sendServerJson(200, "UUIDS_CONFIGURATION_BANNED");
       } else {
         return res.sendServerJson(500, "DATABASE_RECORD_UPDATE_FAILED");
       }
@@ -89,7 +89,7 @@ configsRouter.post("/pardon", async (req: Request, res: Response) => {
     );
 
     if (deleteConfigs) {
-      return res.sendServerJson(204, "UUIDS_CONFIGURATION_PARDONNED");
+      return res.sendServerJson(200, "UUIDS_CONFIGURATION_PARDONNED");
     } else {
       return res.sendServerJson(500, "DATABASE_RECORD_UPDATE_FAILED");
     }
@@ -132,7 +132,7 @@ configsRouter.patch("/update", async (req: Request, res: Response) => {
       );
 
       if (updateConfigs) {
-        return res.sendServerJson(201, "UUIDS_CONFIGURATION_UPDATED");
+        return res.sendServerJson(200, "UUIDS_CONFIGURATION_UPDATED");
       } else {
         return res.sendServerJson(500, "DATABASE_RECORD_UPDATE_FAILED");
       }
@@ -154,17 +154,17 @@ configsRouter.delete("/drop", async (req: Request, res: Response) => {
     const deleteConfigs = await configFiles.deleteAll(validUuids);
 
     if (deleteConfigs) {
-      for (const uuid in uuids) {
+      for (const uuid of validUuids) {
         await deleteFile(uuid);
       }
 
-      return res.sendServerJson(204, "UUIDS_CONFIGURATION_DELETED");
+      return res.sendServerJson(200, "UUIDS_CONFIGURATION_DELETED");
     } else {
       return res.sendServerJson(500, "DATABASE_RECORD_DELETE_FAILED");
     }
   } catch (error) {
     console.serverError("configRouter", error);
-    return res.sendServerJson(500, "DATABASE_RECORD_UPDATE_FAILED");
+    return res.sendServerJson(500, "DATABASE_RECORD_DELETE_FAILED");
   }
 });
 

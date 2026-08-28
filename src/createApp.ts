@@ -14,24 +14,23 @@ export function createApp() {
   const app = express();
 
   app.use(express.json());
-  app.use((req: Request, res: Response, next: NextFunction) => {
-    const ip = req.ip || "";
-    if (!allowedIps().includes(ip)) {
-      return res.sendServerJson(403, "IP_ACCESS_DENIED", { ip });
-    }
-    return next();
-  });
 
-  app.use((req: Request, res: Response, next: NextFunction) => {
-    if (!["GET", "POST", "PUT", "PATCH", "DELETE"].includes(req.method)) {
-      return res.sendServerJson(405, "METHOD_NOT_ALLOWED");
-    }
-
-    if (!["GET", "DELETE"].includes(req.method) && Object.keys(req.body ?? {}).length === 0) {
-      return res.sendServerJson(400, "REQUEST_BODY_MISSING");
-    }
-
+  app.use((req: Request, res: Response, next: NextFunction) => {    
     if (!req.path.startsWith("/getConfig")) {
+      const ip = req.ip || "";
+
+      if (!allowedIps().includes(ip)) {
+        return res.sendServerJson(403, "IP_ACCESS_DENIED", { ip });
+      }
+
+      if (!["GET", "POST", "PUT", "PATCH", "DELETE"].includes(req.method)) {
+        return res.sendServerJson(405, "METHOD_NOT_ALLOWED");
+      }
+
+      if (!["GET", "DELETE"].includes(req.method) && Object.keys(req.body ?? {}).length === 0) {
+        return res.sendServerJson(400, "REQUEST_BODY_MISSING");
+      }
+
       if (!req.headers.authorization) {
         return res.sendServerJson(403, "AUTH_HEADER_MISSING");
       }
