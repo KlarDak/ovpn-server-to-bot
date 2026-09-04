@@ -111,9 +111,9 @@ configsRouter.patch("/update", async (req: Request, res: Response) => {
         return res.sendServerJson(400, "MISSING_REQUIRED_FIELDS");
       }
 
-        if (type !== undefined && (typeof type !== "string" || !["user", "unlimit", "unblocked"].includes(type))) {
-            return res.sendServerJson(400, "INVALID_TYPE_OR_CONTENT");
-        }
+      if (type !== undefined && (typeof type !== "string" || !["user", "unlimit", "unblocked"].includes(type))) {
+          return res.sendServerJson(400, "INVALID_TYPE_OR_CONTENT");
+      }
 
       if (time !== undefined && (typeof time !== "number" || time <= 0)) {
         return res.sendServerJson(400, "INVALID_TIME_OR_CONTENT");

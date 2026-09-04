@@ -32,9 +32,13 @@
 |200|``SERVER_FUNCTIONS_STATUS_SET``|Информация о состоянии функций сервера|
 |200|``METRICS_RETRIEVED``|Данные о физической нагрузке на сервере|
 |200|``ACTIVE_USERS_RETRIEVED``|Данные о подключённых к серверу пользователях|
+|200|``UUIDS_CONFIGURATION_KICKED``|Конфиг-файлы отключены от сервера|
+|200|``UUIDS_CONFIGURATION_BANNED``|Конфиг-файлы заблокированы на сервере|
+|200|``UUIDS_CONFIGURATION_PARDONNED``|Конфиг-файлы разблокированы на сервере|
+|200|``UUIDS_CONFIGURATION_DELETED``|Конфиг-файлы удалены с сервера|
 |204|``USER_KICKED``|Пользователь отключён|
 |204|``USER_BANNED``|Пользователь заблокирован|
-|201|``USER_PARDONNED``|Пользователь разблокирован|
+|200|``USER_PARDONNED``|Пользователь разблокирован|
 |200|``Active users endpoint is working``|_Корневой адрес active-endpoint_
 |-|``Welcome to the secure server! Use the API endpoints to interact with the server.``|_Корневой адрес_|
 
@@ -70,3 +74,7 @@
 |500|``DATABASE_RECORD_UPDATE_FAILED``|Ошибка обновления записи мета-данных конфиг-файла|
 |500|``USER_CONFIGURATION_DELETE_FAILED``|Ошибка удаления конфиг-файла|
 |500|``DATABASE_RECORD_DELETE_FAILED``|Ошибка удаления записи мета-данных конфиг-файла|
+|500|``MISSING_UUIDS_REQUEST``|Массив UUIDS не найден|
+|500|``INVALID_TYPE_OR_CONTENT``|Пропущено поле ``type`` или его значение неверно|
+|500|``INVALID_TIME_OR_CONTENT``|Пропущено поле ``time`` или его значение неверно|
+
